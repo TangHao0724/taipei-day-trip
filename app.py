@@ -11,10 +11,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 config = {
-    "host":os.getenv("HOST"),
-    "user":os.getenv("USER"),
-    "password":os.getenv("PASSWORD"),
-    "database":os.getenv("DATABASE"),
+    "host":os.getenv("DB_HOST"),
+    "user":os.getenv("DB_USER"),
+    "password":os.getenv("DB_PASSWORD"),
+    "database":os.getenv("DB_DATABASE"),
 }
 cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name = "tdt",
 	pool_size = 6,
@@ -160,7 +160,7 @@ async def get_attractions(request: Request,attractionId:int):
 		connect.close()	
 	return JSONResponse({"data": return_json},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@app.get("/api/Categories", response_class=JSONResponse)
+@app.get("/api/categories", response_class=JSONResponse)
 async def get_categories(request: Request):
 	connect = cnxpool.get_connection()
 	try :
@@ -173,7 +173,7 @@ async def get_categories(request: Request):
 	finally:
 		connect.close()	
 	return JSONResponse({"data": cats},status_code=status.HTTP_200_OK)
-@app.get("/app/mrts", response_class=JSONResponse)
+@app.get("/api/mrts", response_class=JSONResponse)
 async def get_mrts(request: Request):
 	connect = cnxpool.get_connection()
 	try :

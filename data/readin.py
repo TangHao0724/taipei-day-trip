@@ -2,13 +2,18 @@ import mysql.connector
 import json
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+current_path =Path(__file__).resolve().parent
+env_path = current_path / '.env'
+
+load_dotenv(dotenv_path=env_path)
+
 config = mysql.connector.connect(
-    host=os.getenv("HOST"),
-    user=os.getenv("USER"),
-    password=os.getenv("PASSWORD"),
-    database=os.getenv("DATABASE")
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_DATABASE")
 )
 
 with open("data/taipei-attractions.json",encoding="utf-8") as f:
