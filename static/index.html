@@ -1,11 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Index</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="/static/scripts/main.js" defer></script>
 </head>
 <body>
-  
+  <nav class="bg-add-c-w">
+    <div>
+      <H2 class=" headline pri-c-70">
+        台北一日遊
+      </H2>
+      <menu>
+        <dt class="body sec-c-70">
+          預定行程
+        </dt>
+        <dt class="body sec-c-70">
+          登入/註冊
+        </dt>
+      </menu>
+    </div>
+  </nav>
+  <header>
+    <img src="/static/imgs/welcomeImage.png" alt="">
+    <section>
+      <section>
+        <span class="header-span">
+          <H1 class="slogan-title add-c-w text-shadow">
+          輕鬆享受台北一日悠閒
+        </H1>
+        <p class="body-b add-c-w">
+          探索每個角落，體驗城市的深度旅遊行程
+        </p>
+        </span>
+        <div class="search">
+          <div class="search-bar input-shadow">
+            <button id="cat-select" class="cat-select body-b bg-sec-c-10 add-c-b">
+              <span>
+                全部分類 ▼
+              </span>
+            </button>
+            <input type="text" id="search-input" placeholder="輸入景點名稱查詢" class="body-b add-c-b bg-add-c-w sec-c-50"/>
+            <button id="search-btn" class="search-btn bg-pri-c-70">
+              <img src="/static/imgs/icon_search.png" alt="">
+            </button>
+          </div>
+          <div id="cat-grid" class="cat-grid cat-grid-off">
+          </div>
+        </div>
+      </section> 
+    </section>
+  </header>  
+  <main>
+    <div class="mrt-bar">
+      <button id="list-btn-l" class="list-btn-l">
+        <img src="/static/imgs/left-btn.png" alt=""  class="list-btn-img">
+      </button>
+      <ul id="mrt-list">
+      </ul>
+      <button id="list-btn-r" class="list-btn-r">
+         <img src="/static/imgs/right-btn.png" alt="" class="list-btn-img">
+      </button>
+    </div>
+    <section class="att-list" >
+      <div id="att-grid" class="att-grid">
+      </div>
+      <div id="load-more"></div>
+    </section>
+  </main>
+  <footer class="bg-sec-c-50">
+    <p class="body-b add-c-w">
+      COPYRIGHT © 2021 台北一日遊
+    </p>
+  </footer>
 </body>
 </html>

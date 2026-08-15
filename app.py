@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import *
 from fastapi.responses import FileResponse , JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 import mysql.connector
 import json
@@ -21,6 +22,7 @@ cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name = "tdt",
 	**config)
 
 app=FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
@@ -36,7 +38,7 @@ async def booking(request: Request):
 async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
 
-@app.get("/api/attractions", response_class=JSONResponse)
+@app.get("/api/attractions", response_class=JSONResponse, tags=["Attraction"])
 async def get_attractions_list(request: Request,page:int ,category:Annotated[str | None, Query()] = None,keyword:Annotated[str | None, Query()] = None,):
 	# 取得不同分頁的旅遊景點列表資料，也可以根據標題關鍵字、或捷運站名稱篩選
 
@@ -130,7 +132,7 @@ async def get_attractions_list(request: Request,page:int ,category:Annotated[str
 
 	return JSONResponse({"nextpage":nextpage,"data":datas},status_code=status.HTTP_200_OK) 
 
-@app.get("/api/attractions/{attractionId}", response_class=JSONResponse)
+@app.get("/api/attractions/{attractionId}", response_class=JSONResponse, tags=["Attraction"])
 async def get_attractions(request: Request,attractionId:int):
 	connect = cnxpool.get_connection()
 	try:
@@ -160,7 +162,7 @@ async def get_attractions(request: Request,attractionId:int):
 		connect.close()	
 	return JSONResponse({"data": return_json},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@app.get("/api/categories", response_class=JSONResponse)
+@app.get("/api/categories", response_class=JSONResponse, tags=["Attraction Category"])
 async def get_categories(request: Request):
 	connect = cnxpool.get_connection()
 	try :
@@ -173,7 +175,7 @@ async def get_categories(request: Request):
 	finally:
 		connect.close()	
 	return JSONResponse({"data": cats},status_code=status.HTTP_200_OK)
-@app.get("/api/mrts", response_class=JSONResponse)
+@app.get("/api/mrts", response_class=JSONResponse, tags=["MRT Station"])
 async def get_mrts(request: Request):
 	connect = cnxpool.get_connection()
 	try :
