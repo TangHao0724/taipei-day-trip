@@ -140,7 +140,39 @@ header>section>section{
     flex-direction: row;
     align-items: center;
 }
+.search>.search-bar>input{
+    flex: 1;
+    
+
+    border: 0;
+    padding: 15px;
+    height: 46px;
+    width: 100%;
+    min-width: 0;
+    max-width: 300px;
+    box-sizing: border-box;
+    
+}
+.search>.search-bar>input::placeholder{
+    font-family: 'Noto Sans TC';
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 13.3px;
+}
+.search>.search-bar>.search-btn{
+    flex-shrink: 0;
+    border: 0;
+    padding: 8px 15px 8px 15px ;
+    
+}
+.search>.search-bar>.search-btn>img{
+    height: 30px;
+    width: 30px;
+    display: block;
+    
+}
 .cat-select{
+    flex-shrink: 0;
     border: 0;
     padding: 16px 8px 16px 8px ;
     width: 100px;
@@ -163,6 +195,7 @@ header>section>section{
     display: none;
 }
 .cat-item{
+    
     padding: 10px 0px;
     display: flex;
     align-items: center;
@@ -170,36 +203,13 @@ header>section>section{
     border: 0;
 
 }
-.search>.search-bar>input{
-    border: 0;
-    padding: 15px;
-    height: 46px;
-    width: 300px;
-    box-sizing: border-box;
-    
-}
-.search>.search-bar>input::placeholder{
-    font-family: 'Noto Sans TC';
-    font-weight: bold;
-    font-size: 16px;
-    line-height: 13.3px;
-}
-.search>.search-bar>.search-btn{
-    border: 0;
-    padding: 8px 15px 8px 15px ;
-    
-}
-.search>.search-bar>.search-btn>img{
-    height: 30px;
-    width: 30px;
-    display: block;
-    
-}
+
 
 /* main */
 main{
     width: 100%;
     height: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -229,10 +239,10 @@ main>.mrt-bar>ul{
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    flex-shrink: 0;
     overflow: hidden;
     white-space: nowrap;
     margin: 0;
+    padding-inline-start: 0;
 }
 .list-btn-item{
     border: 0;
@@ -243,7 +253,6 @@ main>.mrt-bar>ul{
     display: flex; 
     align-items: center;
 }
-
 
 .list-btn-r{
     border: 0;
@@ -263,24 +272,26 @@ main>.mrt-bar>ul{
 /* att */
 .att-list{
     padding: 15px;
-    height: 100%;
-    
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
 }
 .att-grid{
     width: 100%;
     max-width: 1170px;
     gap: 30px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(270px, 270px));
+    justify-content: center;
     box-sizing: border-box;
     overflow-y: auto;
     
 }
 .att-card{
-    width: 100%;
-    max-width: 270px;
-    height: 100%;
-    max-height: 242px;
+    width: 270px;
+    height: 242px;
     border: 1px solid var(--sec-c-20);
     border-radius: 5px;
     overflow: hidden;
@@ -377,7 +388,6 @@ footer>p{
         padding: 0;
     }
     header>img{
-    
         width: 360px;
     }
     .search>.search-bar input{
@@ -386,22 +396,28 @@ footer>p{
     .att-grid{
         display: flex;
         flex-direction: column;
+        align-items: center;
         padding: 15px;
         gap: 15px;
 
     }
-    
     .att-list{
         padding: 0;
     }
     .att-card{
-        max-width: 330px;
-        max-height: 280px;
+        width: 330px;
+        height: 280px;
     }
     .att-photo>.att-img{
         width: 330px;
         height: 235px;
     }
+    
+    main>.mrt-bar>ul{
+        max-width: 266px;
+    }
+    
+
 
 }
 
