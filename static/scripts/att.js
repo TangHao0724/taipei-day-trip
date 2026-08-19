@@ -138,7 +138,7 @@ function setInfo(){
         <span class="info-title body-b sec-c-70">
         交通方式：
         </span>
-        <span class="att-des content sec-c-70">${attData.transport}< /span>
+        <span class="att-des content sec-c-70">${attData.transport}</span>
     </article>
     `;
     const getMain = document.querySelector("main");
