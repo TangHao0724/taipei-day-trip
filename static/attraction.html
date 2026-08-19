@@ -4,8 +4,104 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attraction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/att.css">
+  <script src="/static/scripts/att.js" defer></script>
 </head>
 <body>
-  
+  <nav class="bg-add-c-w">
+    <div>
+      <H2 class=" headline pri-c-70">
+        台北一日遊
+      </H2>
+      <menu>
+        <dt class="body sec-c-70">
+          預定行程
+        </dt>
+        <dt class="body sec-c-70">
+          登入/註冊
+        </dt>
+      </menu>
+    </div>
+  </nav>
+  <main>
+    <section class="att-head">
+      <div  class="picture-roll">
+        <div id="img-window" class="img-window">
+          <div id="img-list" class="img-list">
+          </div>
+        </div>
+        <button id="l-btn" class="l-btn">
+          <img src="/static/imgs/img-left-btn.png" alt="" srcset="">
+        </button>
+        <button id="r-btn" class="r-btn">
+          <img src="/static/imgs/img-right-btn.png" alt="" srcset="">
+        </button>
+        <div id="indi-bar" class="indi-bar">
+        </div>
+      </div>
+      <div class="att-profile">
+        <span id="att-title" class="att-title dialog-title-b  sec-c-70"></span>
+        <span id="att-tags" class="att-tags body sec-c-70">
+        </span>
+        <form action="" id="booking-form" class="booking-form bg-sec-c-20">
+          <div class="form-item">
+            <span class="order-title body-b sec-c-70">
+              訂購導覽行程
+            </span>
+          </div>
+          <div class="form-item">
+            <span class="order-info body sec-c-70">
+              以此景點為中心的一日行程，帶您探索城市角落故事
+            </span>
+          </div>
+          <div  class="form-item">
+            <legend for="date-picker" class="form-label body-b sec-c-70">
+              選擇日期：
+            </legend>
+            <input type="date" name="date" id="date-picker" class="date-picker body sec-c-70" >
+          </div>
+          <div  class="form-item">
+            <legend for="time-radio" class="form-label body-b sec-c-70">
+              選擇時間：
+            </legend>
+            <div class="time">
+              <div id="time-radio" class="time-radio">
+                <input type="radio" name="order-time" id="fst-half" value="0" class="time-radio" checked>
+                <label for="fst-half" class="btn-check"></label>
+                <label for="fst-half" class="radio-label body sec-c-70">上半天</label>
+              </div>
+              <div id="time-radio" class="time-radio">
+                <input type="radio" name="order-time" id="sec-half" value="1" class="time-radio">
+                <label for="sec-half" class="btn-check"></label>
+                <label for="sec-half" class="radio-label body sec-c-70">下半天</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-item">
+            <legend class="form-label body-b sec-c-70">
+              導覽費用：
+            </legend>
+            <span id="order-price" class="order-price body sec-c-70">
+              新臺幣 2000 元
+            </span>
+          </div>
+          <div class="form-item">
+            <button class="form-btn add-c-w button bg-pri-c-70">
+              <span>開始預約行程</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+    <div class="hr"></div>
+  </main>
+  <footer class="bg-sec-c-50">
+    <p class="body-b add-c-w">
+      COPYRIGHT © 2021 台北一日遊
+    </p>
+  </footer>
 </body>
 </html>
