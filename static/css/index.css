@@ -225,6 +225,9 @@ main>.mrt-bar>ul{
     overflow: hidden;
     box-sizing: border-box;
 }
+.att-card > a{
+    text-decoration: none;
+}
 .att-photo{
     position: relative;
     max-width: fit-content;

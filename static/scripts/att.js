@@ -4,7 +4,6 @@ start();
 async function start() {
     const id = get_id();
     attData = await getAttData(id);
-    console.log(attData);
     // 目前只貼一張
     setImgList(attData);
     setInfo();
@@ -28,7 +27,6 @@ function get_id() {
 // load data
 async function getAttData(id) {
     const attUrl = new URL(`/api/attractions/${decodeURIComponent(id)}`, window.location.origin);
-    console.log(attUrl);
     try{
         const response = await fetch(attUrl);
         if(!response.ok){
@@ -77,13 +75,9 @@ function setImgBtn(imgs){
     const lBtn = document.getElementById("l-btn");
     const rBtn = document.getElementById("r-btn");
     lBtn.addEventListener("click",()=>{
-        console.log("lBtn");
-        console.log("nowimglist",nowimglist);
-        console.log("imgs",imgs);
         if(nowimglist > 0){
             document.getElementById(`indi-item-${nowimglist}`).classList.remove("indi-on");
             nowimglist -= 1;
-            console.log("nowimglist after",nowimglist);
             document.getElementById(`indi-item-${nowimglist}`).classList.add("indi-on");
         
             imgWindow.scrollTo({
@@ -94,13 +88,10 @@ function setImgBtn(imgs){
         
     });
     rBtn.addEventListener("click",()=>{
-        console.log("rBtn");
-        console.log("nowimglist",nowimglist);
-        console.log("imgs",imgs);
+
         if(nowimglist < imgs-1 ){
             document.getElementById(`indi-item-${nowimglist}`).classList.remove("indi-on");
             nowimglist += 1;
-            console.log("nowimglist after",nowimglist);
             document.getElementById(`indi-item-${nowimglist}`).classList.add("indi-on");
             
             imgWindow.scrollTo({
@@ -126,7 +117,6 @@ function syncCurrentImage() {
 function setAttProf(){
     const title = document.getElementById("att-title")
     const tags = document.getElementById("att-tags");
-    console.log(attData.name );
     title.innerText = attData.name;
     tags.innerText = `${attData.category} ${"at "+attData.mrt ?? ""}`;
 }
@@ -161,8 +151,7 @@ function bindRadio(){
     radio.forEach(i =>{
         i.addEventListener("change",(e)=>{
             if (e.target.checked) {
-                console.log(`${Number(event.target.value)}`);
-                setPrice(Number(event.target.value));
+                setPrice(Number(e.target.value));
             }
         });
     });

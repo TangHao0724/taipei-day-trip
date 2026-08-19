@@ -100,7 +100,6 @@ async function getAtt(page,category= "",keyword= "") {
 }
 // 繪製card
 function drawCard(attData){
-    const herf = new URL(`/attraction/${attData.id}`,window.location.origin);
     const card = document.createElement("article");
     card.classList.add("att-card","bg-add-c-w");
     card.innerHTML = `
