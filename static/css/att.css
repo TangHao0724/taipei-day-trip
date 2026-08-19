@@ -1,4 +1,8 @@
 @import url("base.css");
+
+body{
+    gap: 40px;
+}
 main{
     display: flex;
     flex-direction: column;
