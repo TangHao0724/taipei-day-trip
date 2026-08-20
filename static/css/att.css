@@ -252,6 +252,7 @@ main{
     gap: 20px;
     box-sizing: border-box;
 
+
 }
 .att-art{
     display: flex;
@@ -297,6 +298,9 @@ main{
     }
 }
 @media (max-width: 360px) {
+    body{
+    gap: 0;
+    }
     .att-head{
         padding: 0;
     }
@@ -328,5 +332,6 @@ main{
     .att-info{
         width: 100%;
         min-width: 0;
+        padding-bottom: 40px;
     }
 }

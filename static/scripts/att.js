@@ -11,6 +11,7 @@ async function start() {
     bindRadio();
      formSub();
 
+    //  監聽size切換
     const resizeObserver = new ResizeObserver(() => {
         requestAnimationFrame(syncCurrentImage);
     });
@@ -109,7 +110,6 @@ function getItemWidth(){
 function syncCurrentImage() {
   const itemWidth = getItemWidth();
 
-  // 尺寸切換時不要 smooth，避免看見補正動畫
   imgWindow.scrollLeft = nowimglist * itemWidth;
 }
 
