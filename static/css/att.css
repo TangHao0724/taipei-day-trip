@@ -261,6 +261,9 @@ main{
 
 
 @media (max-width: 900px){
+    body{
+        gap: 0;
+    }
     .att-head{
         flex-direction: column;
         max-height: fit-content;
@@ -268,8 +271,12 @@ main{
     .hr{
         max-width: calc(100% - 20px);
     }
+    .att-info{
+        padding-bottom: 40px;
+    }
 }
 @media (max-width: 540px) {
+
     .att-head{
         padding: 0;
     }
@@ -298,9 +305,7 @@ main{
     }
 }
 @media (max-width: 360px) {
-    body{
-    gap: 0;
-    }
+
     .att-head{
         padding: 0;
     }
@@ -332,6 +337,6 @@ main{
     .att-info{
         width: 100%;
         min-width: 0;
-        padding-bottom: 40px;
+        
     }
 }
