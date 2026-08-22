@@ -103,28 +103,31 @@ function drawCard(attData){
     const card = document.createElement("article");
     card.classList.add("att-card","bg-add-c-w");
     card.innerHTML = `
-        <div class="att-photo">
+        <a href="/attraction/${attData.id}">
+            <div class="att-photo">
             <!-- 圖片 -->
-              <img src="${attData.images[0]}" alt="${attData.name}" class="att-img">
-              <div class="att-img-name">
+                <img src="${attData.images[0]}" alt="${attData.name}" class="att-img">
+                <div class="att-img-name">
                 <div class="att-img-name-info">
-                  <span class="body-b add-c-w">
+                    <span class="body-b add-c-w">
                     ${attData.name}
-                  </span>
+                    </span>
                 </div>
-              </div>
+                </div>
             </div>
             <div class="att-detail">
             <!-- details -->
-              <div class="att-detail-info">
+                <div class="att-detail-info">
                 <span class="body sec-c-50 att-s-dh">
-                  ${attData.mrt}
+                    ${attData.mrt}
                 </span>
                 <span class="body sec-c-50 att-s-dh">
-                  ${attData.category}
+                    ${attData.category}
                 </span>
-              </div>
+                </div>
             </div>
+        </a>
+        
     `;
     return card;
 }

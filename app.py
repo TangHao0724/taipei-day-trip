@@ -160,7 +160,7 @@ async def get_attractions(request: Request,attractionId:int):
 			return JSONResponse({"error":True,"message":"查詢錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	finally:
 		connect.close()	
-	return JSONResponse({"data": return_json},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return JSONResponse({"data": return_json},status_code=status.HTTP_200_OK)
 
 @app.get("/api/categories", response_class=JSONResponse, tags=["Attraction Category"])
 async def get_categories(request: Request):
