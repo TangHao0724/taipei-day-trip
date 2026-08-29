@@ -1,15 +1,32 @@
 from typing import Annotated
+from pydantic import BaseModel
+import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 from fastapi import *
 from fastapi.responses import FileResponse , JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.security import OAuth2PasswordBearer
 
 import mysql.connector
 import json
 import os
 from dotenv import load_dotenv
+from datetime import datetime, timedelta, timezone
+from pwdlib import PasswordHash
 
 load_dotenv()
+password_hash = PasswordHash.recommended()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/auth")
+
+class User_data(BaseModel):
+	id:int | None = None
+	name:str | None = None
+	email:str	
+	password:str
+class Signin_data(BaseModel):
+	email:str
+	password:str
 
 config = {
     "host":os.getenv("DB_HOST"),
@@ -20,7 +37,6 @@ config = {
 cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name = "tdt",
 	pool_size = 6,
 	**config)
-
 app=FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -157,7 +173,7 @@ async def get_attractions(request: Request,attractionId:int):
 			}
 	except Exception as e:
 			print(f"db error: {e}")
-			return JSONResponse({"error":True,"message":"查詢錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+			return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	finally:
 		connect.close()	
 	return JSONResponse({"data": return_json},status_code=status.HTTP_200_OK)
@@ -171,7 +187,7 @@ async def get_categories(request: Request):
 			cats = [cat for (cat,) in cursor.fetchall()]
 	except Exception as e:
 		print(f"db error: {e}")
-		return JSONResponse({"error":True,"message":"查詢錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+		return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	finally:
 		connect.close()	
 	return JSONResponse({"data": cats},status_code=status.HTTP_200_OK)
@@ -187,7 +203,91 @@ async def get_mrts(request: Request):
 			print(mrts)
 	except Exception as e:
 		print(f"db error: {e}")
-		return JSONResponse({"error":True,"message":"查詢錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+		return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	finally:
 		connect.close()	
 	return JSONResponse({"data": mrts},status_code=status.HTTP_200_OK)
+
+# 會員系統
+key = os.getenv("JWT_SECRET_KEY")
+jwt_algorithm = os.getenv("JWT_ALGORITHM", "HS256")
+if not key:
+	raise RuntimeError("JWT_SECRET_KEY 尚未設定")
+@app.post("/api/user",response_class=JSONResponse,tags=["User"])
+async def register_user(request:Request,register_data:User_data):
+	data = register_data
+	if data.id is not None or data.name is None :
+		return JSONResponse({"error":True,"message":"錯誤的資料格式"},status_code=status.HTTP_400_BAD_REQUEST)
+	
+	connect = cnxpool.get_connection()
+	hash_pw = password_hash.hash(data.password)
+	try:
+		with connect.cursor() as cursor:
+	
+			query = "INSERT INTO users (name , email , password) Values (%s,%s,%s)"
+			cursor.execute(query,(data.name,data.email,hash_pw,))
+
+			connect.commit()
+		return JSONResponse({"ok":True},status_code=status.HTTP_201_CREATED)
+	except mysql.connector.IntegrityError:
+			connect.rollback()
+			return JSONResponse(
+				{"error": True, "message": "註冊失敗，Email 或名稱已存在"},
+				status_code=status.HTTP_400_BAD_REQUEST,
+			)
+	except Exception as e:
+		print(f"db error: {e}")
+		return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	finally:
+		connect.close()
+
+@app.put("/api/user/auth",response_class=JSONResponse,tags=["User"])
+async def sign_in(sign_data:Signin_data):
+	connect = cnxpool.get_connection()
+
+	try:
+		with connect.cursor() as cur:
+			cur.execute("SELECT id, name, email, password FROM users WHERE email = %s ",(sign_data.email,))
+			result = cur.fetchone()
+
+			# 比對帳號與密碼
+			if result is None or not password_hash.verify(
+				sign_data.password,
+				result[3]
+			):
+				return JSONResponse(
+					{"error": True, "message": "Email 或 密碼錯誤"},
+					status_code=status.HTTP_400_BAD_REQUEST,
+				)
+			expire_at = datetime.now(timezone.utc) + timedelta(days=7)
+			# 經過加密處里JWT
+			encoded_jwt  = jwt.encode({"id":result[0],"name":result[1],"email":result[2],"exp":expire_at},key,algorithm=jwt_algorithm)
+
+
+			return JSONResponse({"token":encoded_jwt},status_code=status.HTTP_200_OK)
+	except Exception as e:
+			print(f"db error: {e}")
+			return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	finally:
+		connect.close()
+
+@app.get("/api/user/auth",response_class=JSONResponse,tags=["User"])
+async def get_user(token: Annotated[str, Depends(oauth2_scheme)]):
+	# 傳入bearer token 解密後確認資料
+	try :
+		payload = jwt.decode(token,key,algorithms=[jwt_algorithm])
+		print(payload)
+		payload.pop("exp")
+		return JSONResponse({"data":payload},status_code=status.HTTP_200_OK)
+	except ExpiredSignatureError:
+		raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token 已過期，請重新登入",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+	except InvalidTokenError:
+		raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="無效的 Token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
