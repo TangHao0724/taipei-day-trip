@@ -14,7 +14,6 @@ async function checkStatus(token){
     });
 
     status = await response.json();
-    console.log("status",status);
     if(!response.ok){
       return dialog(false);
     }else{
@@ -33,7 +32,7 @@ function dialog(isPass){
       btn.innerText="登出系統";
       btn.addEventListener('click',(e)=>{
         localStorage.removeItem("TOKEN");
-        checkStatus(token);
+        location.reload();
       })
     }else{
       btn.innerText="登入/註冊";
@@ -73,9 +72,13 @@ function toogleDialog(isOpen,islogin){
           const email = document.getElementById("form-email").value;
           const password = document.getElementById("form-password").value;
           if(islogin){
-            signIn(email,password);
+            if(emailVerify(email) && pwVerify(password)){
+              signIn(email,password);
+            }
           }else{
-            register(name,email,password);
+            if(namerify(name) && emailVerify(email) && pwVerify(password)){
+              register(name,email,password);
+            }
           }
         })
       }
@@ -97,9 +100,15 @@ async function register(name,email,pw){
       },
       body:JSON.stringify(data)
     });
-    console.log(await response);
+    const errorMessage = await response.json();
+    if(!response.ok){
+      alertText(errorMessage["message"],"#a43f39");
+    }else{
+      alertText("註冊成功","#72a439")
+    }
   }catch(e){  
-    throw new Error(`HTTP error status: ${e}`);
+    alertText("程式錯誤請稍後再試","#a43f39");
+    console.error(e);
   }
 
 }
@@ -116,18 +125,18 @@ async function signIn(email,pw){
       },
       body:JSON.stringify(data)
     });
-
-    if (!response.ok) {
-        throw new Error(`HTTP error status: ${response.status}`);
-    }
     const responseData = await response.json();
-    console.log(responseData);
+    if (!response.ok) {
+      alertText(responseData["message"] || "所輸入的帳號或密碼錯誤","#a43f39");
+      return;
+    }
+    
     localStorage.setItem('TOKEN', responseData["token"]);
-
     location.reload();
 
   }catch(e){
-    throw new Error(`HTTP error status: ${e}`);
+    alertText("程式錯誤請稍後再試","#a43f39");
+    console.error(e);
   }
   
 }
@@ -135,12 +144,12 @@ function createDialog(islogin){
   const dialog = document.createElement('div');
   const login = `
       <input type="text" name="email" id="form-email" class="dialog-form-input" placeholder="輸入電子信箱"/>
-      <input type="text" name="password" id="form-password" class="dialog-form-input" placeholder="輸入密碼"/>
+      <input type="password" name="password" id="form-password" class="dialog-form-input" placeholder="輸入密碼"/>
   `;
   const register = `
       <input type="text" name="name" id="form-name" class="dialog-form-input" placeholder="輸入姓名"/>
       <input type="text" name="email" id="form-email" class="dialog-form-input" placeholder="輸入電子信箱"/>
-      <input type="text" name="password" id="form-password" class="dialog-form-input" placeholder="輸入密碼"/>
+      <input type="password" name="password" id="form-password" class="dialog-form-input" placeholder="輸入密碼"/>
   `;
   dialog.classList.add("dialog","bg-add-c-w")
   dialog.innerHTML = 
@@ -167,10 +176,42 @@ function createDialog(islogin){
           </span>
         </div>
       </form>
-      <span id="alert" class="body sec-c-70">
+      <span id="dialog-alert" class="body sec-c-70">
       </span>
     </div>
   `
   
   return dialog;
+}
+function alertText(alertStr,color){
+  const alertDom = document.getElementById("dialog-alert");
+  alertDom.innerText = alertStr;
+  alertDom.style.color = color;
+}
+// verfily
+function emailVerify(str){
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(str === ""){
+    alertText("請輸入電子信箱","#a43f39");
+    return false;
+  }
+  if(!regex.test(str)){
+    alertText("請輸入正確電子信箱格式","#a43f39");
+    return false;
+  }
+  return true;
+}
+function pwVerify(str){
+  if(str === ""){
+    alertText("請輸入密碼","#a43f39");
+    return false;
+  }
+  return true;
+}
+function namerify(str){
+  if(str === ""){
+    alertText("請輸入姓名","#a43f39");
+    return false;
+  }
+  return true;
 }

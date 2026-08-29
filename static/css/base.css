@@ -75,6 +75,7 @@ nav>div>menu>dt{
 }
 .dialog-btn{
     border: 0;
+    cursor: pointer;
 }
 
 
@@ -104,6 +105,7 @@ nav>div>menu>dt{
     padding-inline:0;
     padding-block:0;
     padding: 7px;
+    cursor: pointer;
 }
 .dialog-exit-btn >img{
     
@@ -159,6 +161,7 @@ nav>div>menu>dt{
     padding: 10px 20px;
     border: 0;
     border-radius: 5px;
+    cursor: pointer;
 
     
 }
@@ -177,7 +180,15 @@ nav>div>menu>dt{
 .footer-content >a{
     border: 0;
     background: 0;
+    cursor: pointer;
 }
+.footer-content >a:hover{
+    border: 0;
+    background: 0;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* footer */
 footer{
     background-color: var(--sec-c-50);
