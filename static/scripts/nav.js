@@ -188,6 +188,7 @@ function alertText(alertStr,color){
   alertDom.innerText = alertStr;
   alertDom.style.color = color;
 }
+
 // verfily
 function emailVerify(str){
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
