@@ -4,7 +4,6 @@ start();
 async function start() {
     const id = get_id();
     attData = await getAttData(id);
-    // 目前只貼一張
     setImgList(attData);
     setInfo();
     setAttProf();
@@ -71,6 +70,7 @@ function setIndeBar(imgs){
     const list = document.getElementById("indi-bar");
     list.append(...indis);
 }
+
 const imgWindow = document.getElementById("img-window");
 function setImgBtn(imgs){
     const lBtn = document.getElementById("l-btn");
@@ -109,7 +109,6 @@ function getItemWidth(){
 }
 function syncCurrentImage() {
   const itemWidth = getItemWidth();
-
   imgWindow.scrollLeft = nowimglist * itemWidth;
 }
 
@@ -118,7 +117,7 @@ function setAttProf(){
     const title = document.getElementById("att-title")
     const tags = document.getElementById("att-tags");
     title.innerText = attData.name;
-    tags.innerText = `${attData.category} ${"at "+attData.mrt ?? ""}`;
+    tags.textContent = `${attData.category} ${"at "+attData.mrt ?? ""}`;
 }
 // info
 function setInfo(){
@@ -166,11 +165,14 @@ function formSub(){
     document.getElementById("booking-form").addEventListener('submit',(event)=>{
         event.preventDefault();
         const date = document.getElementById("date-picker");
-        const time = document.getElementsByName("order-time");
+        const time = document.querySelector(
+        'input[name="order-time"]:checked'
+        );
+        console.log("form time",typeof time.value);
         const formData = {
             "att": attData,
             "date": date.value || null,
-            "time": time.value == "0" ? "上半場":"下半場",
+            "time": time.value == "0" ? "morning":"afternoon",
             "price": time.value == "0"?2000:2500
         }
         console.log(formData);

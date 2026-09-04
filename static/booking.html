@@ -1,11 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Booking</title>
+  <title>Index</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/index.css">
+  <link rel="stylesheet" href="/static/css/booking.css">
+  <script src="/static/scripts/index.js" defer></script>
 </head>
 <body>
-    <H1>你好</H1>
+  <div id="black-drop" class="drop-display black-drop"></div>
+  <nav class="bg-add-c-w">
+    <script src="/static/scripts/nav.js" defer></script>
+    <div>
+      <H2 class=" headline pri-c-70">
+        台北一日遊
+      </H2>
+      <menu>
+        <dt class="body sec-c-70">
+          預定行程
+        </dt>
+        <dt >
+          <button id="dialog-btn" class="dialog-btn bg-add-c-w body sec-c-70">
+          </button>
+        </dt>
+      </menu>
+    </div>
+  </nav>
+  <main>
+    <section class="booking-title">
+      <span class="button-b sec-c-70">
+        您好，Nico，待預定的行程如下：
+      </span>
+    </section>
+    <section class="booking-item">
+      <div class="booking-list">
+        <div class="att-img">
+          <img src="https://padax.github.io/taipei-day-trip-resources/imgs/1-0.jpg" alt="" srcset="">
+        </div>
+        <div class="att-info">
+          <div class="remove-img">
+            <img src="/static/imgs/icon_dele.png" alt="" srcset="">
+          </div>
+          <div class="info-title">
+            <span class="body-b pri-c-70">
+              台北一日遊：平安鐘
+            </span>
+          </div>
+          <div class="index">
+            <div class="index-content">
+              <span class="info-title body-b sec-c-70">日期：</span>
+              <span class="info-content body sec-c-70">2021-01-02</span>
+            </div>
+            <div class="index-content">
+              <span class="info-title body-b sec-c-70">時間：</span>
+              <span class="info-content  body sec-c-70">早上 9 點到下午 4 點</span>
+            </div>
+            <div class="index-content">
+              <span class="info-title body-b sec-c-70">費用：</span>
+              <span class="info-content body sec-c-70">新台幣 2000 元</span>
+            </div>
+            <div class="index-content">
+              <span class="info-title body-b sec-c-70">地點：</span>
+              <span class="info-content body sec-c-70">臺北市 大安區忠孝東路4段</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <div class="hr"></div>
+    <section class="booking-item">
+        <span class="block-title button-b sec-c-70">您的聯絡資訊：</span>
+        <div class="block">
+          <div class="block-item">
+            <span class="title body sec-c-70">聯絡姓名：</span>
+            <input type="text" name="contact-name" id="content-name" class="input body add-c-b">
+          </div>
+          <div class="block-item">
+            <span class="title body sec-c-70">聯絡信箱：</span>
+            <input type="text" name="contact-email" id="content-email" class="input body add-c-b">
+          </div>
+          <div class="block-item">
+            <span class="title body sec-c-70">手機號碼：</span>
+            <input type="text" name="contact-phone" id="content-phone" class="input body add-c-b">
+          </div>
+          <div class="block-item">
+            <span class="notice body-b sec-c-70">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</span>
+          </div>
+      </div>
+    </section>
+    <div class="hr"></div>
+    <div class="booking-item">
+              <span class="block-title button-b sec-c-70">信用卡付款資訊：</span>
+        <div class="block">
+          <div class="block-item">
+            <span class="title body sec-c-70">卡片號碼：</span>
+            <input type="text" name="contact-name" id="content-name" class="input body add-c-b">
+          </div>
+          <div class="block-item">
+            <span class="title body sec-c-70">過期時間：</span>
+            <input type="text" name="contact-email" id="content-email" class="input body add-c-b">
+          </div>
+          <div class="block-item">
+            <span class="title body sec-c-70">驗證密碼：</span>
+            <input type="text" name="contact-phone" id="content-phone" class="input body add-c-b">
+          </div>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <section class="booking-item">
+      <div class="send">
+        <span class="body-b sec-c-70">總價：新台幣 2000 元</span>
+        <button class="send-btn bg-pri-c-70 button add-c-w">確認訂購並付款</button>
+      </div>
+    </section>
+  </main>
+  <footer class="bg-sec-c-50">
+    <p class="body-b add-c-w">
+      COPYRIGHT © 2021 台北一日遊
+    </p>
+  </footer>
 </body>
 </html>

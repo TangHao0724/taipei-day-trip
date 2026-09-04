@@ -81,7 +81,6 @@ async function getAtt(page,category= "",keyword= "") {
     if(keyword!= ""){
         base_url.searchParams.append("keyword",keyword);
     }
-    console.log("base_url : "+ base_url.toString());
     let datas;
     try {
         const response = await fetch(base_url);
@@ -95,7 +94,6 @@ async function getAtt(page,category= "",keyword= "") {
     } catch (error) {
         throw new Error("fetch error"+error);
     }
-    console.log(datas);
     return datas;
 }
 // 繪製card
@@ -214,7 +212,6 @@ function mrtBtn(){
 }
 function mrtLi() {
     const buttons = document.querySelectorAll("#mrt-list > li > button");
-    console.log("buttons" + buttons.length);
     buttons.forEach(button => {
         button.addEventListener("click", async event => {
             const name = event.currentTarget.querySelector("span").innerText;
@@ -271,7 +268,6 @@ async function setCatTagGrid() {
 }
 function catBtn() {
     const buttons = document.querySelectorAll("#cat-grid > button");
-    console.log("buttons" + buttons.length);
     buttons.forEach(button => {
         button.addEventListener("click", async event => {
             const name = event.currentTarget.querySelector("span").innerText;
