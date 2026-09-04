@@ -1,0 +1,108 @@
+
+.booking-title{
+    width: 100%;
+    max-width: 1000px;
+    padding-bottom: 30px;
+
+}
+.booking-title >span{
+    margin-left: auto;
+}
+.booking-item{
+    width: 100%;
+    max-width: 980px;
+}
+/* list */
+.booking-list{
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: space-around;
+    align-items: start;
+}
+.att-img{
+    width: fit-content;
+    height: fit-content;
+}
+.att-img >img{
+    width: 250px;
+    height: 200px;
+    overflow: hidden;
+    display: block;
+}
+.att-info{
+   width: 100%;
+   max-width: 700px; 
+   position: relative;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+}
+.info-title > span{
+    line-height: 24px;
+}
+.index{
+    line-height: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.remove-img{
+    width: fit-content;
+    height: fit-content ;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+}
+.remove-img >img{
+    width: 30px;
+    height: 30px;
+    display: block;
+    overflow: hidden;
+
+}
+/* hr */
+.hr{
+    border-top: 1px solid var(--sec-c-20);
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px 0px;
+}
+/* block */
+.block-title{
+    display: block;
+    margin-bottom: 20px;
+    padding: 4px 0px;
+} 
+.block{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.input{
+    width: 200px;
+    height: 38px;
+    padding: 10px;
+    border: 1px solid var(--sec-c-20);
+    border-radius: 5px;
+    line-height: 16px;
+    box-sizing: border-box;
+}
+.notice{
+    display: block;
+    height: 24px;
+}
+/* send */
+.send{
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    gap: 22px;
+}
+.send-btn{
+    border: 0;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
