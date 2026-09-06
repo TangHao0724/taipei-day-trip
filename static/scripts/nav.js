@@ -3,6 +3,7 @@ const token = localStorage.getItem("TOKEN");
 let isOpenByBk = false;
 main();
 async function main(){
+    titleLink();
     await checkStatus(token);
 }
 async function checkStatus(token){
@@ -29,7 +30,13 @@ async function checkStatus(token){
   }
   
 }
+function titleLink(){
+  document.getElementById("nav-title").addEventListener("click",()=>{
+      window.location.replace("/");
+    }
+  );
 
+}
 function dialog(isPass){
     const btn = document.getElementById("dialog-btn");
     if(isPass){
