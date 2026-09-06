@@ -1,14 +1,18 @@
 let attData = null;
 let nowimglist = 0;
+const attoken = localStorage.getItem("TOKEN");
+
 start();
 async function start() {
     const id = get_id();
+    const userData = await checkStatus(attoken);
     attData = await getAttData(id);
     setImgList(attData);
     setInfo();
     setAttProf();
+    setTimePicker();
     bindRadio();
-     formSub();
+    formSub(userData);
 
     //  監聽size切換
     const resizeObserver = new ResizeObserver(() => {
@@ -17,6 +21,27 @@ async function start() {
 
     resizeObserver.observe(imgWindow);
     
+}
+async function checkStatus(token){
+  try{
+    const response = await fetch("/api/user/auth",{
+      headers:{
+        "Authorization":`Bearer ${token}` 
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.log(data.detail);
+      return null;
+    }
+
+    console.log(data);
+    return data; 
+  }catch(e){
+    throw new Error(e);
+  }
 }
 
 function get_id() {
@@ -161,21 +186,59 @@ function setPrice(time){
     price.innerText = `新臺幣 ${time == "0"?2000:2500} 元`
 
 }
-function formSub(){
-    document.getElementById("booking-form").addEventListener('submit',(event)=>{
+async function formSub(userData){
+    document.getElementById("booking-form").addEventListener('submit',async (event)=>{
         event.preventDefault();
-        const date = document.getElementById("date-picker");
-        const time = document.querySelector(
-        'input[name="order-time"]:checked'
-        );
-        console.log("form time",typeof time.value);
-        const formData = {
-            "att": attData,
-            "date": date.value || null,
-            "time": time.value == "0" ? "morning":"afternoon",
-            "price": time.value == "0"?2000:2500
+        if (!userData){
+            toogleDrop(true);
+            toogleDialog(true,true);
+        }else{
+            const date = document.getElementById("date-picker");
+            const time = document.querySelector(
+            'input[name="order-time"]:checked'
+            );
+            const formData = {
+                "attractionId": attData.id,
+                "date": date.value || null,
+                "time": time.value == "0" ? "morning":"afternoon",
+                "price": time.value == "0"? 2000:2500
+            }
+            try{
+                const response = await fetch("/api/booking",{
+                method:"POST",
+                headers:{
+                    "Authorization":`Bearer ${attoken}` ,
+                    "Content-Type": "application/json",
+                },
+                body:JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if(!response.ok){
+                alertText(result.message,"#a43f39");
+                }else{
+                    window.location.assign("/booking");
+                }
+                
+                
+            }catch(e){
+                throw new Error(e);
+            }
         }
-        console.log(formData);
+
+
     });
 
+}
+function alertText(alertStr,color){
+  const alertDom = document.getElementById("dialog-alert");
+  alertDom.innerText = alertStr;
+  alertDom.style.color = color;
+}
+function setTimePicker(){
+    const input = document.getElementById("date-picker");
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+
+    input.min = today.toISOString().split('T')[0];
 }

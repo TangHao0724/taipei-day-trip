@@ -1,5 +1,6 @@
 const bd = document.getElementById("black-drop");
 const token = localStorage.getItem("TOKEN");
+let isOpenByBk = false;
 main();
 async function main(){
     await checkStatus(token);
@@ -15,13 +16,16 @@ async function checkStatus(token){
 
     status = await response.json();
     if(!response.ok){
-      return dialog(false);
+      dialog(false);
+      bookingBtn(false);
     }else{
-      return dialog(true);
+      dialog(true);
+      bookingBtn(true);
     }
     
   }catch(e){
-    return dialog(false);
+    dialog(false);
+    bookingBtn(false);
   }
   
 }
@@ -32,7 +36,11 @@ function dialog(isPass){
       btn.innerText="登出系統";
       btn.addEventListener('click',(e)=>{
         localStorage.removeItem("TOKEN");
-        location.reload();
+        if(window.location.pathname === "/booking"){
+          window.location.assign('/');
+        }else{
+          location.reload();
+        }
       })
     }else{
       btn.innerText="登入/註冊";
@@ -132,7 +140,13 @@ async function signIn(email,pw){
     }
     
     localStorage.setItem('TOKEN', responseData["token"]);
-    location.reload();
+    if(isOpenByBk){
+      isOpenByBk =false;
+      window.location.assign("/booking");
+    }else{
+      location.reload();
+    }
+    
 
   }catch(e){
     alertText("程式錯誤請稍後再試","#a43f39");
@@ -188,7 +202,21 @@ function alertText(alertStr,color){
   alertDom.innerText = alertStr;
   alertDom.style.color = color;
 }
+// booking
+function bookingBtn(isPass){
+  document.getElementById("booking-btn").addEventListener("click",()=>{
+    if(!isPass){
+      isOpenByBk = true;
+      toogleDrop(true);
+      toogleDialog(true,true);
+    }else{
+      window.location.assign('/booking');
+    }
+    
+  });
 
+
+}
 // verfily
 function emailVerify(str){
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

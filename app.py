@@ -283,14 +283,13 @@ async def sign_in(sign_data:Signin_data):
 	finally:
 		connect.close()
 
-@app.get("/api/user/auth",response_class=JSONResponse,tags=["User"])
-async def get_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 	# 傳入bearer token 解密後確認資料
 	try :
 		payload = jwt.decode(token,key,algorithms=[jwt_algorithm])
 		print(payload)
-		payload.pop("exp")
-		return JSONResponse({"data":payload},status_code=status.HTTP_200_OK)
+		payload.pop("exp", None)
+		return payload
 	except ExpiredSignatureError:
 		raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -303,12 +302,19 @@ async def get_user(token: Annotated[str, Depends(oauth2_scheme)]):
             detail="無效的 Token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+	
+@app.get("/api/user/auth",tags=["User"])
+async def get_user(user: dict = Depends(get_current_user)):
+	print("user",user)
+	return JSONResponse(
+		content={"data": user},
+		status_code=status.HTTP_200_OK,
+	)
 
 # 訂單系統
 @app.get("/api/booking",response_class=JSONResponse,tags=["Booking"])
-async def get_booking(user=Depends(get_user)):
-	user_data = user["data"]
-	print(user_data)
+async def get_booking(user:dict = Depends(get_current_user)):
+	print(user)
 	connect = cnxpool.get_connection()
 	try:
 		with connect.cursor() as cur:
@@ -326,24 +332,22 @@ async def get_booking(user=Depends(get_user)):
 			WHERE orders.user_id = %s AND orders.paid = FALSE
 			ORDER BY img.id ASC LIMIT 1"""
 
-			cur.execute(sql,(user_data.id,))
+			cur.execute(sql,(user["id"],))
 			order_data = cur.fetchone()
 			if order_data is None:
 				return JSONResponse({"data":None},status_code=status.HTTP_200_OK)
 			response = {
-				"data":{
 					"attraction":{
 						"id": order_data[0],
 						"name": order_data[1],
 						"address":order_data[2],
 						"image":order_data[3],
 					},
-					"date":order_data[4],
+					"date":order_data[4].isoformat() if order_data[4] else None,
 					"time":order_data[5],
 					"price":order_data[6],
 				}
-			}
-			return JSONResponse(response,status_code=status.HTTP_200_OK)
+			return JSONResponse({"data":response},status_code=status.HTTP_200_OK)
 	except Exception as e:
 		print(f"db error: {e}")
 		return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -351,11 +355,10 @@ async def get_booking(user=Depends(get_user)):
 		connect.close()		
 
 @app.post("/api/booking",response_class=JSONResponse,tags=["Booking"])
-async def new_booking(data:Booking_data,user=Depends(get_user)):
-	user_data = user["data"]
+async def new_booking(data:Booking_data,user=Depends(get_current_user)):
 	
 	# 檢查時間合理性，切換上下半場
-	print(user_data)
+	print(user)
 	if data.date < date.today():
 		return JSONResponse(
 			{"error": True, "message": "無效的時間"},
@@ -369,14 +372,14 @@ async def new_booking(data:Booking_data,user=Depends(get_user)):
 				DELETE FROM orders
 				WHERE orders.user_id = %s AND orders.paid = FALSE 
 			"""
-			cur.execute(dele_sql,(user_data.id,))
+			cur.execute(dele_sql,(user["id"],))
 			sql ="""
                 INSERT INTO orders (user_id, attraction_id, order_at, time_slot, price)
                 VALUES (%s, %s, %s, %s, %s)
             """
 			cur.execute(
 				sql,
-				(user_data.id, data.attractionId, data.date, data.time.value, data.price)
+				(user["id"], data.attractionId, data.date, data.time.value, data.price)
 			)
 		connect.commit()
 		return JSONResponse({"ok":True},status_code=status.HTTP_201_CREATED)
@@ -396,8 +399,7 @@ async def new_booking(data:Booking_data,user=Depends(get_user)):
 
 
 @app.delete("/api/booking",response_class=JSONResponse,tags=["Booking"])
-async def dele_booking(user=Depends(get_user)):
-	user_data = user["data"]
+async def dele_booking(user=Depends(get_current_user)):
 	connect =cnxpool.get_connection()
 	try:
 		with connect.cursor() as cur:
@@ -405,7 +407,7 @@ async def dele_booking(user=Depends(get_user)):
 				DELETE FROM orders
 				WHERE orders.user_id = %s AND orders.paid = FALSE 
 			"""
-			cur.execute(sql,(user_data.id,))
+			cur.execute(sql,(user["id"],))
 			connect.commit()
 			return JSONResponse({"ok":True},status_code=status.HTTP_200_OK)
 	except Exception as e:
