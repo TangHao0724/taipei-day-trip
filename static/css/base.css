@@ -80,11 +80,7 @@ nav>div>menu>dt{
     cursor: pointer;
     padding-inline:0;
 }
-.booking-btn{
-    border: 0;
-    cursor: pointer;
-    padding-inline:0;
-}
+
 
 /* dialog */
 .dialog{
