@@ -152,7 +152,7 @@ CREATE TABLE `orders` (
   KEY `attraction_id` (`attraction_id`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attractions` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,7 +161,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (2,1,1,'2026-09-01 00:00:00','afternoon',NULL,NULL,NULL,'2026-09-02 11:50:25',NULL,0);
+INSERT INTO `orders` VALUES (2,1,1,'2026-09-01 00:00:00','afternoon',NULL,NULL,NULL,'2026-09-02 11:50:25',NULL,0),(17,2,3,'2026-09-24 00:00:00','morning',NULL,NULL,NULL,'2026-09-08 02:28:06',2000,0);
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,7 +176,6 @@ CREATE TABLE `payment` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `order_id` int unsigned DEFAULT NULL,
   `rec_trade_id` varchar(255) DEFAULT NULL,
-  `status_id` int unsigned DEFAULT NULL,
   `bank_transaction_id` varchar(64) DEFAULT NULL,
   `amount` int DEFAULT NULL,
   `currency` varchar(8) DEFAULT NULL,
@@ -186,11 +185,10 @@ CREATE TABLE `payment` (
   `transaction_time_millis` int DEFAULT NULL,
   `bank_transaction_time` json DEFAULT NULL,
   `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
-  KEY `status_id` (`status_id`),
-  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
-  CONSTRAINT `payment_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`)
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -201,33 +199,6 @@ CREATE TABLE `payment` (
 LOCK TABLES `payment` WRITE;
 /*!40000 ALTER TABLE `payment` DISABLE KEYS */;
 /*!40000 ALTER TABLE `payment` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `payment_status_history`
---
-
-DROP TABLE IF EXISTS `payment_status_history`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `payment_status_history` (
-  `payment_id` int unsigned NOT NULL,
-  `status_id` int unsigned NOT NULL,
-  `create_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`payment_id`,`status_id`),
-  KEY `status_id` (`status_id`),
-  CONSTRAINT `payment_status_history_ibfk_1` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
-  CONSTRAINT `payment_status_history_ibfk_2` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `payment_status_history`
---
-
-LOCK TABLES `payment_status_history` WRITE;
-/*!40000 ALTER TABLE `payment_status_history` DISABLE KEYS */;
-/*!40000 ALTER TABLE `payment_status_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -295,4 +266,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-06 16:21:02
+-- Dump completed on 2026-09-09 15:01:05

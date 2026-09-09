@@ -1,5 +1,4 @@
 const btoken = localStorage.getItem("TOKEN");
-
 main();
 async function main(){
     setTitle();
@@ -16,7 +15,7 @@ async function checkBooking(){
         if(!response.ok){
             window.location.replace("/");
         }
-        console.log(result.data);
+        console.log("Udata",result.data);
         setList(result.data);
         setform(result.data);
         
@@ -142,29 +141,17 @@ function setform(data){
             <div class="booking-item">
                     <span class="block-title button-b sec-c-70">信用卡付款資訊：</span>
                 <div class="block">
-                <div class="block-item">
+                <div class="block-item card-number-group">
                     <span class="title body sec-c-70">卡片號碼：</span>
-                    <input type="text" 
-                    name="card-num" id="card-num" 
-                    class="input body add-c-b" 
-                    placeholder="**** **** **** ****"
-                    maxlength="19"
-                    inputmode="numeric">
+                    <div class="tpfield" id="card-number"></div>
                 </div>
-                <div class="block-item">
+                <div class="block-item expiration-date-group">
                     <span class="title body sec-c-70">過期時間：</span>
-                    <input type="text" name="card-time" id="card-time" 
-                    class="input body add-c-b" 
-                    placeholder="MM/YY"
-                    inputmode="numeric">
+                    <div class="tpfield" id="card-expiration-date"></div>
                 </div>
-                <div class="block-item">
+                <div class="block-item ccv-group">
                     <span class="title body sec-c-70">驗證密碼：</span>
-                    <input type="text" name="card-cvv" id="card-cvv" 
-                    class="input body add-c-b" 
-                    maxlength="3"
-                    placeholder="CVV"
-                    inputmode="numeric">
+                    <div class="tpfield" id="card-ccv"></div>
                 </div>
             </div>
             </div>
@@ -176,60 +163,139 @@ function setform(data){
             </div>
             </section>
     `);
-    setCardInput();
+    setCard();
     form();
     removeBtn(btoken);
     }
 }
-function form(){
+function setCard(){
+    let fields = {
+        number: {
+            // css selector
+            element: '#card-number',
+            placeholder: '**** **** **** ****'
+        },
+        expirationDate: {
+            // DOM object
+            element: document.getElementById('card-expiration-date'),
+            placeholder: 'MM / YY'
+        },
+        ccv: {
+            element: '#card-ccv',
+            placeholder: 'ccv'
+        },
+    };
+    TPDirect.card.setup({
+        fields: fields,
+        styles: {
+            // Style all elements
+            'input': {
+                'color': 'gray'
+            },
+            // Styling ccv field
+            'input.ccv': {
+                'font-weight': '500',
+                'font-size': '16px',
+                'line-height':"16px"
+            },
+            // Styling expiration-date field
+            'input.expiration-date': {
+                'font-weight': '500',
+                'font-size': '16px',
+                'line-height':"16px"
+            },
+            // Styling card-number field
+            'input.card-number': {
+                'font-weight': '500',
+                'font-size': '16px',
+                'line-height':"16px"
+            },
+            // style focus state
+            ':focus': {
+                'color': 'black'
+            },
+            // style valid state
+            '.valid': {
+                'color': 'green'
+            },
+            // style invalid state
+            '.invalid': {
+                'color': 'red'
+            },
+            // Media queries
+            // Note that these apply to the iframe, not the root window.
+            '@media screen and (max-width: 400px)': {
+                'input': {
+                    'color': 'gray'
+                }
+            }
+        }
+    })
+    TPDirect.card.onUpdate(function (update) {
+        // update.canGetPrime === true
+        // --> you can call TPDirect.card.getPrime()
+        if (update.canGetPrime) {
+            // Enable submit Button to get prime.
+            // submitButton.removeAttribute('disabled')
+        } else {
+            // Disable submit Button to get prime.
+            // submitButton.setAttribute('disabled', true)
+        }
 
+        // cardTypes = ['mastercard', 'visa', 'jcb', 'amex', 'unknown']
+        // if (update.cardType === 'visa') {
+        //     // Handle card type visa.
+        // }
+
+        // number fields is error
+        if (update.status.number === 2) {
+            console.log('number fields fail: ' + update.status.number)
+        } else if (update.status.number === 0) {
+            console.log('number fields fail: ' + update.status.number)
+        } else {
+            console.log('number fields fail: ' + update.status.number)
+        }
+
+        if (update.status.expiry === 2) {
+            console.log('date fields fail: ' + update.status.expiry)
+        } else if (update.status.expiry === 0) {
+            console.log('date fields fail: ' + update.status.expiry)
+        } else {
+            console.log('date fields fail: ' + update.status.expiry)
+        }
+
+        if (update.status.ccv === 2) {
+            console.log('ccv fields fail: ' + update.status.ccv)
+        } else if (update.status.ccv === 0) {
+            console.log('ccv fields fail: ' + update.status.ccv)
+        } else {
+            console.log('ccv fields fail: ' + update.status.ccv)
+        }
+    })
+}
+function form(){
+    
     document.getElementById("send-btn").addEventListener("click",()=>{
         const formElementData={
             contactName:document.getElementById("contact-name").value,
             contactEmail:document.getElementById("contact-email").value,
             contactPhone:document.getElementById("contact-phone").value,
-            cardNum:document.getElementById("card-num").value,
-            cardTime:document.getElementById("card-time").value,
-            cardCsv:document.getElementById("card-csv").value,
         }
         console.log(
             formElementData.contactName,
             formElementData.contactEmail,
             formElementData.contactPhone,
-            formElementData.cardNum,
-            formElementData.cardTime,
-            formElementData.cardCsv,
         );
+        TPDirect.card.getPrime(function(result) {
+        if (result.status !== 0) {
+            console.log('getPrime fail: ' + result.status)
+        }
+            let prime = result.card.prime
+            console.log('getPrime success: ' + prime)
+        })
     })
 }
-function setCardInput(){
-    
-    document.getElementById("card-num").addEventListener("input",(event)=>{
-        const input = event.target;
-        const value = input.value.replace(/\D/g, "").substring(0, 16);
-        const formattedValue = value
-            .match(/.{1,4}/g)?.join(' ') || "";
-
-        input.value = formattedValue;
-    });
-    document.getElementById("card-time").addEventListener("input",(event)=>{
-        const input = event.target;
-        const value = input.value.replace(/\D/g, "").substring(0, 4);
-        const formattedValue = value
-            .match(/.{1,2}/g)?.join("/")|| "";;
-
-        input.value = formattedValue;
-    });
-    document.getElementById("card-cvv").addEventListener("input",(event)=>{
-        const input = event.target;
-        const value = input.value.replace(/\D/g, "").substring(0, 3);
-        const formattedValue =  value;
-
-        input.value = formattedValue;
-    });
-
-}
-async function removeBtn(token){
+async function removeBtn(token){    
     document.getElementById("remove-btn").addEventListener("click",async ()=>{
         try{
             const response = await fetch("/api/booking",{
