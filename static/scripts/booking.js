@@ -74,7 +74,7 @@ function drawList(data){
         `;
     }else{
         list.classList.add("booking-list");
-        const timeRange = data.date === "morning" ? "早上 9 點到下午 4 點": "下午 4 點到晚上九點";
+        const timeRange = data.date === "morning" ? "早上 9 點到下午 4 點": "下午 4 點到晚上 9 點";
         list.innerHTML=`
                 <div class="att-img">
                     <img src="${data.attraction.image}" alt="" srcset="">
@@ -160,11 +160,13 @@ function setform(data){
             <div class="send">
                 <span class="body-b sec-c-70">總價：新台幣 2000 元</span>
                 <button id="send-btn" class="send-btn bg-pri-c-70 button add-c-w">確認訂購並付款</button>
+                <span id="form-alert" class="body sec-c-70">
+                </span>
             </div>
             </section>
     `);
     setCard();
-    form();
+    form(data);
     removeBtn(btoken);
     }
 }
@@ -229,6 +231,11 @@ function setCard(){
                     'color': 'gray'
                 }
             }
+        },
+        isMaskCreditCardNumber: true,
+        maskCreditCardNumberRange: {
+            beginIndex: 4,
+            endIndex: 11
         }
     })
     TPDirect.card.onUpdate(function (update) {
@@ -273,9 +280,10 @@ function setCard(){
         }
     })
 }
-function form(){
+function form(data){
     
-    document.getElementById("send-btn").addEventListener("click",()=>{
+    document.getElementById("send-btn").addEventListener("click",(e)=>{
+        e.preventDefault();
         const formElementData={
             contactName:document.getElementById("contact-name").value,
             contactEmail:document.getElementById("contact-email").value,
@@ -286,12 +294,84 @@ function form(){
             formElementData.contactEmail,
             formElementData.contactPhone,
         );
-        TPDirect.card.getPrime(function(result) {
-        if (result.status !== 0) {
-            console.log('getPrime fail: ' + result.status)
+        
+        if (formElementData.contactName === "" || formElementData.contactName === null){
+            alertFormText("請輸入名稱")
+            return;
         }
-            let prime = result.card.prime
-            console.log('getPrime success: ' + prime)
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (formElementData.contactEmail === "" || formElementData.contactEmail === null){
+            e.preventDefault();
+            alertFormText("請輸入 Email");
+        }
+        if (!emailPattern.test(formElementData.contactEmail)){
+            alertFormText("Email 格式不正確");
+            return;
+        }
+        const phonePattern = /^09\d{8}$/;
+        if (formElementData.contactPhone === "" || formElementData.contactPhone === null){
+            alertFormText("請輸入電話號碼")
+            return;
+        }
+        if (!phonePattern.test(formElementData.contactPhone)){
+            alertFormText("電話號碼格式不正確,請輸入 09 開頭的 10 碼數字");
+            return;
+        }
+
+
+        TPDirect.card.getPrime(async function(result) {
+        if (result.status !== 0) {
+            alertFormText(result.status);
+            return;
+        }
+        let prime = result.card.prime
+        try{
+            const body = {
+                prime: prime,
+                order: {
+                    price: data.price,
+                    trip: {
+                        attraction: {
+                            id: data.attraction.id,
+                            name: data.attraction.name,
+                            address: data.attraction.address,
+                            image: data.attraction.image
+                        },
+                        date: data.date,
+                        time: data.time
+                    }
+                },
+                contact: {
+                    name: formElementData.contactName,
+                    email: formElementData.contactEmail,
+                    phone: formElementData.contactPhone
+                }
+            };
+
+            console.log("body",body);
+            const response = await fetch("/api/orders",{
+            method:"POST",
+            headers:{
+                "Authorization":`Bearer ${btoken}`,
+                "Content-Type": "application/json"
+            },
+            body:JSON.stringify(body)
+            });
+
+            let status = await response.json();
+            console.log(response.status); 
+            if(!response.ok){
+                alertFormText("訂單建立失敗,請稍後再試");
+                return;
+            }else{
+                console.log(status);   
+                window.location.replace(`/thankyou/?number=${status.number}`);
+            }
+        }catch(e){
+            console.error(e);
+            alertFormText("發生錯誤,請稍後再試");
+        }
         })
     })
 }
@@ -315,4 +395,10 @@ async function removeBtn(token){
         }
     });
 
+}
+
+function alertFormText(alertStr){
+  const alertDom = document.getElementById("form-alert");
+  alertDom.innerText = alertStr;
+  alertDom.style.color = "#a43f39";
 }

@@ -16,6 +16,7 @@ from datetime import datetime, timedelta, timezone,date
 from pwdlib import PasswordHash
 
 from enum import Enum
+import requests
 
 load_dotenv()
 password_hash = PasswordHash.recommended()
@@ -40,6 +41,29 @@ class Booking_data(BaseModel):
 	time: Time_slot
 	price:int
 
+class Attraction(BaseModel):
+	id:int
+	name:str
+	address:str
+	image:str
+
+class Order(BaseModel):
+	price:int
+	trip:Trip
+
+class Trip(BaseModel):
+    attraction: Attraction
+    date: date
+    time: str
+
+class Contact(BaseModel):
+	name:str
+	email:str
+	phone:str
+class Full_order(BaseModel):
+	prime:str
+	order:Order
+	contact:Contact
 
 config = {
     "host":os.getenv("DB_HOST"),
@@ -418,5 +442,190 @@ async def dele_booking(user=Depends(get_current_user)):
 	finally:
 		connect.close()		
 	
+# ordering
 
+@app.post("/api/orders",response_class=JSONResponse,tags=["Order"]) 
+async def new_order(data:Full_order,user=Depends(get_current_user)):
+	connect =cnxpool.get_connection()
+	partner_key="partner_kSxkVGCDl8l3vMuIPqaahF7rSejDoDO8qRdoiH9hULWdbmTsF5BIMMVA"
+	# 檢查格式(先跳過)
+	# 送出表單
+	pt_url ="https://sandbox.tappaysdk.com/tpc/payment/pay-by-prime"
+	merchant_id="nicoth35011_TAISHIN"
+	header = {
+		"Content-Type": "application/json",
+		"x-api-key":"partner_kSxkVGCDl8l3vMuIPqaahF7rSejDoDO8qRdoiH9hULWdbmTsF5BIMMVA"
+	 }
+	db_data ={}
+	try:
+		# 撿price
+		with connect.cursor() as cur:
+			
+			sql = """SELECT 
+				att.name, 
+				orders.order_at, 
+				orders.time_slot,
+				orders.price,
+				orders.id,
+				orders.create_at
+			FROM orders  
+			JOIN attractions AS att ON orders.attraction_id = att.id 
+			LEFT JOIN att_img_urls AS img ON orders.attraction_id = img.attraction_id
+			WHERE orders.user_id = %s AND orders.paid = FALSE
+			ORDER BY img.id ASC LIMIT 1"""
+
+			cur.execute(sql,(user["id"],))
+			order_data = cur.fetchone()
+			if order_data is None:
+				return JSONResponse({"error":True,"message":"不存在的訂單"},status_code=status.HTTP_400_BAD_REQUEST)
+			db_data = {
+					"name": order_data[0],
+					"date":order_data[1].isoformat() if order_data[1] else None,
+					"time":order_data[2],
+					"price":order_data[3],
+				}
+		# 執行支付
+		body={
+			"prime":data.prime,
+			"partner_key":"partner_kSxkVGCDl8l3vMuIPqaahF7rSejDoDO8qRdoiH9hULWdbmTsF5BIMMVA",
+			"merchant_id":merchant_id,
+			"amount":db_data["price"],
+			"details":f"{db_data['name']} {db_data['date']} {db_data['time']}",
+			"cardholder":{
+				"phone_number":data.contact.phone,
+				"name":data.contact.name,
+				"email":data.contact.email,
+			}
+		}
+		response = requests.post(pt_url,headers=header,json=body)
+		if response.ok:
+			payment = response.json()
+			print(payment)
+			if payment["status"] != 0:
+				return JSONResponse({"error":True,"message":"交易失敗"},status_code=status.HTTP_400_BAD_REQUEST)
+		
+		# 塞入payment
+		with connect.cursor() as cur:
+			order_id = order_data[4]
+			create_at = order_data[5]
+			order_number=create_at.strftime("%Y%m%d%H%M%S")
+			cur.execute("UPDATE orders SET paid = TRUE, order_number = %s,contact_name = %s,contact_email=%s,contact_phone=%s WHERE id = %s",
+			   (
+				order_number,
+				data.contact.name,
+				data.contact.email,
+				data.contact.phone,
+				order_id
+				))
+			# 將獲得的內容存入db
+			sql = """
+				INSERT INTO payment (
+					order_id,
+					rec_trade_id,
+					status,
+					bank_transaction_id,
+					amount,
+					currency,
+					details,
+					card_info,
+					transaction_time_millis,
+					bank_transaction_time
+				)
+				VALUES (
+					%s, %s, %s, %s, %s,
+					%s, %s, %s, %s, %s
+				)
+			"""
+			values = (
+				order_id,
+				payment["rec_trade_id"],
+				True,
+				payment["bank_transaction_id"],
+				payment["amount"],
+				payment["currency"],
+				f"{data.order.trip.attraction.name} {data.order.trip.date} {data.order.trip.time}",
+				json.dumps(payment["card_info"]),
+				payment["transaction_time_millis"],
+				json.dumps(payment["bank_transaction_time"])
+				)
+			print("values",values)
+			cur.execute(sql,values)
+			connect.commit()
+			return JSONResponse({
+				"number":order_number,
+				"payment":{
+					"status":payment["status"],
+					"msg":payment["msg"]
+				}
+			},status_code=status.HTTP_200_OK)
+	except Exception as e:
+		print(f"db error: {e}")
+		return JSONResponse({"error":True,"message":"查詢時發生錯誤，請稍後再試"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	finally:
+		connect.close()		
 	
+	# 回傳結果
+@app.get("/api/order/{order_number}",response_class=JSONResponse,tags=["Order"])
+def get_order(order_number:str,user=Depends(get_current_user)):
+	user_id = user["id"]
+	connect = cnxpool.get_connection()
+	try:
+		with connect.cursor() as cur:
+			sql="""SELECT 
+				att.id, 
+				att.name, 
+				att.address, 
+				img.img_url, 
+				orders.order_at, 
+				orders.time_slot, 
+				orders.price,
+				orders.contact_name,
+				orders.contact_email,
+				orders.contact_phone,
+				orders.paid 
+			FROM orders  
+			JOIN attractions AS att ON orders.attraction_id = att.id 
+			LEFT JOIN att_img_urls AS img ON orders.attraction_id = img.attraction_id
+			WHERE orders.user_id = %s AND orders.order_number = %s
+			ORDER BY img.id ASC LIMIT 1"""
+			cur.execute(sql , (user_id, order_number))
+			response  =cur.fetchone()
+			if response is None:
+				return JSONResponse(
+					{
+						"error": True,
+						"message": "找不到此訂單"
+					},
+					status_code=status.HTTP_404_NOT_FOUND
+			)
+			result = {
+				"data":{
+					"number": order_number,
+					"price": response[6],
+					"trip": {
+						"attraction": {
+							"id": response[0],
+							"name": response[1],
+							"address": response[2],
+							"image": response[3]
+						},
+						"date": response[4].date().isoformat(),
+						"time": response[5]
+					},
+					"contact": {
+					"name": response[7],
+					"email": response[8],
+					"phone": response[9]
+					},
+					"status": response[10]
+				}
+			}
+			return JSONResponse(content=result,status_code=status.HTTP_200_OK)
+	except Exception as e:
+			print(e)
+			return JSONResponse({
+				"error":True,
+				"message":f"發生查詢錯誤 {e}"
+			},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)		
+	finally:
+		connect.close()
