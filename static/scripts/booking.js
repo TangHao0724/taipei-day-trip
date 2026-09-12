@@ -15,7 +15,6 @@ async function checkBooking(){
         if(!response.ok){
             window.location.replace("/");
         }
-        console.log("Udata",result.data);
         setList(result.data);
         setform(result.data);
         
@@ -37,7 +36,6 @@ async function checkStatus(token){
     if(!response.ok){
         return null;
     }else{
-        console.log(status.data);
         return status.data;
     }
   }catch(e){
@@ -238,47 +236,6 @@ function setCard(){
             endIndex: 11
         }
     })
-    TPDirect.card.onUpdate(function (update) {
-        // update.canGetPrime === true
-        // --> you can call TPDirect.card.getPrime()
-        if (update.canGetPrime) {
-            // Enable submit Button to get prime.
-            // submitButton.removeAttribute('disabled')
-        } else {
-            // Disable submit Button to get prime.
-            // submitButton.setAttribute('disabled', true)
-        }
-
-        // cardTypes = ['mastercard', 'visa', 'jcb', 'amex', 'unknown']
-        // if (update.cardType === 'visa') {
-        //     // Handle card type visa.
-        // }
-
-        // number fields is error
-        if (update.status.number === 2) {
-            console.log('number fields fail: ' + update.status.number)
-        } else if (update.status.number === 0) {
-            console.log('number fields fail: ' + update.status.number)
-        } else {
-            console.log('number fields fail: ' + update.status.number)
-        }
-
-        if (update.status.expiry === 2) {
-            console.log('date fields fail: ' + update.status.expiry)
-        } else if (update.status.expiry === 0) {
-            console.log('date fields fail: ' + update.status.expiry)
-        } else {
-            console.log('date fields fail: ' + update.status.expiry)
-        }
-
-        if (update.status.ccv === 2) {
-            console.log('ccv fields fail: ' + update.status.ccv)
-        } else if (update.status.ccv === 0) {
-            console.log('ccv fields fail: ' + update.status.ccv)
-        } else {
-            console.log('ccv fields fail: ' + update.status.ccv)
-        }
-    })
 }
 function form(data){
     
@@ -289,11 +246,6 @@ function form(data){
             contactEmail:document.getElementById("contact-email").value,
             contactPhone:document.getElementById("contact-phone").value,
         }
-        console.log(
-            formElementData.contactName,
-            formElementData.contactEmail,
-            formElementData.contactPhone,
-        );
         
         if (formElementData.contactName === "" || formElementData.contactName === null){
             alertFormText("請輸入名稱")
@@ -349,7 +301,6 @@ function form(data){
                 }
             };
 
-            console.log("body",body);
             const response = await fetch("/api/orders",{
             method:"POST",
             headers:{
@@ -360,12 +311,10 @@ function form(data){
             });
 
             let status = await response.json();
-            console.log(response.status); 
             if(!response.ok){
                 alertFormText("訂單建立失敗,請稍後再試");
                 return;
             }else{
-                console.log(status);   
                 window.location.replace(`/thankyou/?number=${status.number}`);
             }
         }catch(e){

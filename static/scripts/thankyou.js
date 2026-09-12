@@ -21,7 +21,6 @@ async function getBooking(orderNum){
         // if(!response.ok){
         //     window.location.replace("/");
         // }
-        console.log("order",result);
         setList(result.data);
     }catch(e){
         throw new Error(`${e}`);
@@ -45,7 +44,6 @@ async function checkStatus(token){
     if(!response.ok){
         return null;
     }else{
-        console.log(status.data);
         return status.data;
     }
   }catch(e){
