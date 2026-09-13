@@ -197,9 +197,18 @@ async function formSub(userData){
             const time = document.querySelector(
             'input[name="order-time"]:checked'
             );
+           
+            if (!time){
+                alertText("尚未選擇時間","#a43f39");
+                return;
+            }
+            if (!date.value){
+                alertText("尚未選擇日期","#a43f39");
+                return;
+            }
             const formData = {
                 "attractionId": attData.id,
-                "date": date.value || null,
+                "date": date.value,
                 "time": time.value == "0" ? "morning":"afternoon",
                 "price": time.value == "0"? 2000:2500
             }
@@ -215,12 +224,11 @@ async function formSub(userData){
 
                 const result = await response.json();
                 if(!response.ok){
+                console.log(result);
                 alertText(result.message,"#a43f39");
                 }else{
                     window.location.assign("/booking");
-                }
-                
-                
+                } 
             }catch(e){
                 throw new Error(e);
             }

@@ -381,18 +381,26 @@ async def get_booking(user:dict = Depends(get_current_user)):
 
 @app.post("/api/booking",response_class=JSONResponse,tags=["Booking"])
 async def new_booking(data:Booking_data,user=Depends(get_current_user)):
-	
-	# 檢查時間合理性，切換上下半場
 	print(user)
 	if data.date < date.today():
 		return JSONResponse(
 			{"error": True, "message": "無效的時間"},
 			status_code=status.HTTP_400_BAD_REQUEST,
 		)
-	
 	connect = cnxpool.get_connection()
 	try:
 		with connect.cursor() as cur:
+			cur.execute(
+				"SELECT id FROM attractions WHERE id = %s",
+				(data.attractionId,)
+			)
+
+			if cur.fetchone() is None:
+				return JSONResponse(
+					{"error": True, "message": "錯誤的景點ID"},
+					status_code=400
+				)
+			
 			dele_sql ="""
 				DELETE FROM orders
 				WHERE orders.user_id = %s AND orders.paid = FALSE 
@@ -408,12 +416,6 @@ async def new_booking(data:Booking_data,user=Depends(get_current_user)):
 			)
 		connect.commit()
 		return JSONResponse({"ok":True},status_code=status.HTTP_201_CREATED)
-	except mysql.connector.IntegrityError:
-		connect.rollback()
-		return JSONResponse(
-			{"error": True, "message": "錯誤的景點ID"},
-			status_code=status.HTTP_400_BAD_REQUEST 	,
-		)
 	except Exception as e:
 		connect.rollback()
 		print(f"db error: {e}")

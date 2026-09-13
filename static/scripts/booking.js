@@ -134,7 +134,6 @@ function setform(data){
                     <span class="notice body-b sec-c-70">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</span>
                 </div>
             </div>
-            </section>
             <div class="hr"></div>
             <div class="booking-item">
                     <span class="block-title button-b sec-c-70">信用卡付款資訊：</span>
