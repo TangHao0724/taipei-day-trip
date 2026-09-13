@@ -147,12 +147,14 @@ CREATE TABLE `orders` (
   `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `price` int DEFAULT NULL,
   `paid` tinyint(1) NOT NULL DEFAULT '0',
+  `status` tinyint(1) DEFAULT '0',
+  `order_number` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `attraction_id` (`attraction_id`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attractions` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,7 +163,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (2,1,1,'2026-09-01 00:00:00','afternoon',NULL,NULL,NULL,'2026-09-02 11:50:25',NULL,0);
+INSERT INTO `orders` VALUES (20,2,12,'2026-10-01 00:00:00','afternoon','唐祥豪','thomas35011@gmail.com','0971219290','2026-09-12 05:10:50',2500,1,0,'20260912131050'),(21,2,4,'2026-09-23 00:00:00','morning','唐祥豪','thomas35011@gmail.com','0971219290','2026-09-12 07:38:12',2000,1,0,'20260912153812'),(23,2,8,'2026-09-30 00:00:00','afternoon','4565','wwe21e21','e2132141','2026-09-12 07:45:19',2500,1,0,'20260912154519'),(24,2,8,'2026-09-30 00:00:00','afternoon','唐祥豪','thomas35011@gmail.com','1234123','2026-09-12 07:47:24',2500,1,0,'20260912154724'),(25,2,8,'2026-09-23 00:00:00','morning','3213214','321421','32143124','2026-09-12 07:51:34',2000,1,0,'20260912155134'),(26,2,6,'2026-09-16 00:00:00','morning','唐祥豪','1234','34124','2026-09-12 07:52:18',2000,1,0,'20260912155218'),(28,2,2,'2026-09-30 00:00:00','morning','3213214','thomas35011@gmail.com','0971219290','2026-09-12 08:03:10',2000,1,0,'20260912160310'),(30,2,2,'2026-09-22 00:00:00','morning','唐祥豪','thomas35011@gmail.com','0971219290','2026-09-12 09:48:36',2000,1,0,'20260912174836'),(31,2,3,'2026-09-29 00:00:00','afternoon','唐祥豪','thomas35011@gmail.com','0971219290','2026-09-12 10:17:53',2500,1,0,'20260912181753'),(32,2,2,'2026-10-01 00:00:00','morning',NULL,NULL,NULL,'2026-09-12 10:28:16',2000,0,0,NULL);
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,22 +178,20 @@ CREATE TABLE `payment` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `order_id` int unsigned DEFAULT NULL,
   `rec_trade_id` varchar(255) DEFAULT NULL,
-  `status_id` int unsigned DEFAULT NULL,
   `bank_transaction_id` varchar(64) DEFAULT NULL,
   `amount` int DEFAULT NULL,
   `currency` varchar(8) DEFAULT NULL,
   `details` varchar(255) DEFAULT NULL,
   `card_secret` json DEFAULT NULL,
   `card_info` json DEFAULT NULL,
-  `transaction_time_millis` int DEFAULT NULL,
+  `transaction_time_millis` bigint unsigned DEFAULT NULL,
   `bank_transaction_time` json DEFAULT NULL,
   `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
-  KEY `status_id` (`status_id`),
-  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
-  CONSTRAINT `payment_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -200,34 +200,8 @@ CREATE TABLE `payment` (
 
 LOCK TABLES `payment` WRITE;
 /*!40000 ALTER TABLE `payment` DISABLE KEYS */;
+INSERT INTO `payment` VALUES (5,20,'D20260912lXo36t','TP20260912lXo36t',2500,'TWD','行天宮 2026-10-01 afternoon',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789189856535,'{\"end_time_millis\": \"1789189856546\", \"start_time_millis\": \"1789189856546\"}','2026-09-12 05:11:06',1),(6,21,'D20260912Simtdm','TP20260912Simtdm',2000,'TWD','國立故宮博物院 2026-09-23 morning',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789198699138,'{\"end_time_millis\": \"1789198699160\", \"start_time_millis\": \"1789198699160\"}','2026-09-12 07:38:28',1),(7,23,'D20260912Yxv41s','TP20260912Yxv41s',2500,'TWD','大安森林公園 2026-09-30 afternoon',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789199140210,'{\"end_time_millis\": \"1789199140228\", \"start_time_millis\": \"1789199140228\"}','2026-09-12 07:45:50',1),(8,24,'D20260912BHtlvP','TP20260912BHtlvP',2500,'TWD','大安森林公園 2026-09-30 afternoon',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789199430446,'{\"end_time_millis\": \"1789199430464\", \"start_time_millis\": \"1789199430464\"}','2026-09-12 07:50:40',1),(9,25,'D20260912L9QyJX','TP20260912L9QyJX',2000,'TWD','大安森林公園 2026-09-23 morning',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789199505670,'{\"end_time_millis\": \"1789199505687\", \"start_time_millis\": \"1789199505687\"}','2026-09-12 07:51:55',1),(10,26,'D20260912W6uMyZ','TP20260912W6uMyZ',2000,'TWD','陽明山溫泉區 2026-09-16 morning',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789199543369,'{\"end_time_millis\": \"1789199543386\", \"start_time_millis\": \"1789199543386\"}','2026-09-12 07:52:33',1),(11,28,'D20260912zgb3po','TP20260912zgb3po',2000,'TWD','大稻埕碼頭 2026-09-30 morning',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789203081723,'{\"end_time_millis\": \"1789203081741\", \"start_time_millis\": \"1789203081741\"}','2026-09-12 08:51:31',1),(12,30,'D20260912Ax7RHw','TP20260912Ax7RHw',2000,'TWD','大稻埕碼頭 2026-09-22 morning',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789207524706,'{\"end_time_millis\": \"1789207524742\", \"start_time_millis\": \"1789207524742\"}','2026-09-12 10:05:34',1),(13,31,'D20260912HmI8WW','TP20260912HmI8WW',2500,'TWD','士林官邸 2026-09-29 afternoon',NULL,'{\"type\": 1, \"level\": \"\", \"issuer\": \"CTBC Bank\", \"bank_id\": \"822\", \"country\": \"TAIWAN R.O.C\", \"funding\": 0, \"bin_code\": \"424242\", \"last_four\": \"4242\", \"country_code\": \"TW\", \"issuer_zh_tw\": \"中國信託銀行(CTBC Bank)\"}',1789208817355,'{\"end_time_millis\": \"1789208817366\", \"start_time_millis\": \"1789208817366\"}','2026-09-12 10:27:07',1);
 /*!40000 ALTER TABLE `payment` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `payment_status_history`
---
-
-DROP TABLE IF EXISTS `payment_status_history`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `payment_status_history` (
-  `payment_id` int unsigned NOT NULL,
-  `status_id` int unsigned NOT NULL,
-  `create_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`payment_id`,`status_id`),
-  KEY `status_id` (`status_id`),
-  CONSTRAINT `payment_status_history_ibfk_1` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
-  CONSTRAINT `payment_status_history_ibfk_2` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `payment_status_history`
---
-
-LOCK TABLES `payment_status_history` WRITE;
-/*!40000 ALTER TABLE `payment_status_history` DISABLE KEYS */;
-/*!40000 ALTER TABLE `payment_status_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -273,7 +247,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -282,7 +256,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'nico','nico@gmail.com','$argon2id$v=19$m=65536,t=3,p=4$q/t7CdmmT/YwyI1vszVbWw$1857nkaJWlM1HSZ4SyZmub0ljjcPQL0IIREH+ulw5y4','2026-08-26 13:39:52','2026-08-26 13:39:52',NULL,NULL),(2,'abc','abc@abc.com','$argon2id$v=19$m=65536,t=3,p=4$C+QX7UvtEeBbJn60vovitA$AdDMAzq3a9ete8GFofH6ZfytoTcids2hT83S8Swk/HM','2026-08-29 10:55:35','2026-08-29 10:55:35',NULL,NULL),(3,'test','test@test.com','$argon2id$v=19$m=65536,t=3,p=4$NXmN5LLcgYTwAYP52KnguA$57y1LwhKcReOwGsnZ/3YQzRwgYisUsR/hVN6HLYzHvY','2026-08-29 14:03:19','2026-08-29 14:03:19',NULL,NULL);
+INSERT INTO `users` VALUES (1,'nico','nico@gmail.com','$argon2id$v=19$m=65536,t=3,p=4$q/t7CdmmT/YwyI1vszVbWw$1857nkaJWlM1HSZ4SyZmub0ljjcPQL0IIREH+ulw5y4','2026-08-26 13:39:52','2026-08-26 13:39:52',NULL,NULL),(2,'abc','abc@abc.com','$argon2id$v=19$m=65536,t=3,p=4$C+QX7UvtEeBbJn60vovitA$AdDMAzq3a9ete8GFofH6ZfytoTcids2hT83S8Swk/HM','2026-08-29 10:55:35','2026-08-29 10:55:35',NULL,NULL),(3,'test','test@test.com','$argon2id$v=19$m=65536,t=3,p=4$NXmN5LLcgYTwAYP52KnguA$57y1LwhKcReOwGsnZ/3YQzRwgYisUsR/hVN6HLYzHvY','2026-08-29 14:03:19','2026-08-29 14:03:19',NULL,NULL),(6,'qwer','qwer@qwer.com','$argon2id$v=19$m=65536,t=3,p=4$qRp0uJjkM04t5K95TfLXkg$tj4sEqJpDRfuTtcexSP0ya9F/FufcK731mx4/fVnaHE','2026-09-12 03:35:51','2026-09-12 03:35:51',NULL,NULL),(7,'asdf','asdf@asdf.asdf','$argon2id$v=19$m=65536,t=3,p=4$0grJq60jjWTTV0oAxqqqFA$ftnKy7n3hz/3zjbqlMGjDyFgZPsHI6BAn2tBKqSyBTk','2026-09-12 04:49:12','2026-09-12 04:49:12',NULL,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -295,4 +269,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-06 16:21:02
+-- Dump completed on 2026-09-12 18:30:21

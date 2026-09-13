@@ -72,6 +72,9 @@ main{
     z-index: 10;
     border: 0;
 }
+.remove-img:hover{
+    cursor: pointer;
+}
 .remove-img >img{
     width: 30px;
     height: 30px;
@@ -97,6 +100,12 @@ main{
     flex-direction: column;
     gap: 15px;
 }
+.block-item{
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    align-items: center;
+}
 .input{
     width: 200px;
     height: 38px;
@@ -111,6 +120,15 @@ main{
     height: 24px;
     line-height:24px;
 }
+/* TapPay */
+.tpfield {
+    height: 38px;
+    width: 200px;
+    border: 1px solid var(--sec-c-20);
+    padding: 10px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
 /* send */
 .send{
     height: 100px;
@@ -123,6 +141,9 @@ main{
     border: 0;
     border-radius: 5px;
     padding: 10px 20px;
+}
+.send-btn:hover{
+    cursor: pointer;
 }
 /* footer */
 body{
