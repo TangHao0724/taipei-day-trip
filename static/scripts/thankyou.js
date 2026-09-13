@@ -29,7 +29,7 @@ async function getBooking(orderNum){
 async function setTitle(){
     const userData = await checkStatus(ttoken);
     document.getElementById("title").textContent = 
-        `您好，${userData.name}，您已預約成功！詳細如下：`;
+        `您好，${userData.name}，已預約成功！您的訂單號碼為「${getParm()}」。詳細如下：`;
 }
 async function checkStatus(token){
   let status;
