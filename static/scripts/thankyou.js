@@ -10,7 +10,7 @@ function getParm(){
     const urlParams = new URLSearchParams(queryString);
     return urlParams.get('number') ?? null;
 }
-async function getBooking(orderNum){
+async function getToken(orderNum){
     try{
         const response = await fetch(`/api/order/${orderNum}`,{
         headers:{

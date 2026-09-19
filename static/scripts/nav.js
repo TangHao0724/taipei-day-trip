@@ -40,14 +40,15 @@ function titleLink(){
 function dialog(isPass){
     const btn = document.getElementById("dialog-btn");
     if(isPass){
-      btn.innerText="登出系統";
+      btn.innerText="會員中心";
       btn.addEventListener('click',(e)=>{
-        localStorage.removeItem("TOKEN");
-        if(window.location.pathname === "/booking"){
-          window.location.assign('/');
-        }else{
-          location.reload();
-        }
+        window.location.assign('/member');
+        // localStorage.removeItem("TOKEN");
+        // if(window.location.pathname === "/booking"){
+        //   window.location.assign('/');
+        // }else{
+        //   location.reload();
+        // }
       })
     }else{
       btn.innerText="登入/註冊";
