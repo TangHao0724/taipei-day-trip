@@ -37,7 +37,7 @@ app=FastAPI()
 mcp_app = mcp.http_app(path='/mcp')
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/analytics", mcp_app)
+app.mount("/mcp", mcp_app)
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
