@@ -41,7 +41,8 @@ async def add_to_cart(date:date,start_at:datetime,att_id:int,):
 		return {"error": "Bearer 開頭錯誤"}
 
 	token = auth[len("Bearer "):].strip()
-	id = auth_token(token)
+	id =await auth_token(token)
+	print("auth_token id",id)
 	if id is None:
 		return {"error": True,"msg":"不存在的用戶"}
 	

@@ -181,7 +181,7 @@ async def add_booking(data:Booking_data ,user_id:int) -> bool:
 	except Exception as e:
 		connect.rollback()
 		print(f"db error: {e}")
-		return DatabaseError()
+		return False
 	finally:
 		connect.close()
 
