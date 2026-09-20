@@ -33,9 +33,9 @@ config = {
 cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name = "tdt",
 	pool_size = 6,
 	**config)
-app=FastAPI()
-mcp_app = mcp.http_app(path='/mcp')
 
+mcp_app = mcp.http_app(path="/")
+app=FastAPI(lifespan=mcp_app.lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/mcp", mcp_app)
 
