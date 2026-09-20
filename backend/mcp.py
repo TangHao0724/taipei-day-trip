@@ -36,7 +36,7 @@ async def add_to_cart(date:date,start_at:datetime,att_id:int,):
 	headers = get_http_headers(include_all=True)
 
 	auth = headers.get("authorization", "")
-	
+	print("header",auth)
 	if not auth.startswith("Bearer "):
 		return {"error": "Bearer 開頭錯誤"}
 
@@ -60,7 +60,9 @@ async def add_to_cart(date:date,start_at:datetime,att_id:int,):
 		time=period,
 		price=price
 	)
-	result = add_booking(data,id)
+	result = await add_booking(data,id)
+	if not result:
+		raise {"error": True,"msg":"預約時發生錯誤。"}
 	return{
 		"ok":True,
 		"message":"台北導覽行程，預定成功，請到 Booking Page URL 完成付款。",

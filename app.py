@@ -237,7 +237,7 @@ async def new_booking(data:Booking_data,user=Depends(get_current_user)):
 	print("now_user",user)
 	result = await add_booking(data,user["id"])
 	if not result:
-		return JSONResponse({"error":True,"message":"建立發生錯誤"},status_code=status.HTTP_201_CREATED)
+		return JSONResponse({"error":True,"message":"建立發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	JSONResponse({"ok":True},status_code=status.HTTP_201_CREATED)
 
 
