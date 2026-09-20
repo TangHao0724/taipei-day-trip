@@ -63,7 +63,7 @@ async function rollLoading(){
 // att
 // 獲取資料
 async function getAtt(page,category= "",keyword= "") {
-    if ((typeof page !== 'number')) {
+    if ((typeof page !== 'number')&& page !== null) {
         throw new TypeError('page必須是 number 型別，並且必填');
     }
     if (typeof category !== 'string') {
@@ -135,8 +135,9 @@ async function setCards(page,category ="",keyword=""){
     if(category.includes("全部分類")){
         cat = "";
     }
+    console.log("page",page);
     const data = await getAtt(page,cat,keyword);
-    nextpage = data.nextpage;
+    nextpage = data.nextPage;
     if (data.data.length < 1){
         return null;
     }
