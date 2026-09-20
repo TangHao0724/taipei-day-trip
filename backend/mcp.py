@@ -22,7 +22,7 @@ async def get_attraction(keyword:str):
 		result = await get_att_list(index,None,keyword)
 		index = index + 1 
 		data.append(result["data"])
-		if result["nextpage"] is None:
+		if result["nextPage"] is None:
 			break
 	return {"data":data}
 
