@@ -140,7 +140,7 @@ async def get_att_list(page:int,category:str|None, keyword:str|None)-> dict:
                     "images" : images.get(i[0], [])
                 }
                 data.append(a)
-            return {"nextpage":nextpage,"data":data}
+            return {"nextPage":nextpage,"data":data}
     except Exception as e:
         print(f"db error: {e}")
         raise DatabaseError()
