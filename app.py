@@ -1,5 +1,4 @@
 from typing import Annotated
-from pydantic import BaseModel
 import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
@@ -15,55 +14,15 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone,date
 from pwdlib import PasswordHash
 
-from enum import Enum
+from backend.mcp import mcp
+from backend.error import AttractionNotFoundError, DatabaseError
+from backend.schema import User_data, Signin_data, Booking_data,Full_order
+from backend.service import add_booking, new_mcptoken, search_attraction,get_att_list, ser_mcptoken
 import requests
 
 load_dotenv()
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/auth")
-class Time_slot(str, Enum):
-	MORNING = "morning"
-	AFTERNOON = "afternoon"
-
-class User_data(BaseModel):
-	id:int | None = None
-	name:str | None = None
-	email:str	
-	password:str
-
-class Signin_data(BaseModel):
-	email:str
-	password:str
-
-class Booking_data(BaseModel):
-	attractionId:int
-	date:date
-	time: Time_slot
-	price:int
-
-class Attraction(BaseModel):
-	id:int
-	name:str
-	address:str
-	image:str
-
-class Order(BaseModel):
-	price:int
-	trip:Trip
-
-class Trip(BaseModel):
-    attraction: Attraction
-    date: date
-    time: str
-
-class Contact(BaseModel):
-	name:str
-	email:str
-	phone:str
-class Full_order(BaseModel):
-	prime:str
-	order:Order
-	contact:Contact
 
 config = {
     "host":os.getenv("DB_HOST"),
@@ -74,8 +33,11 @@ config = {
 cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name = "tdt",
 	pool_size = 6,
 	**config)
-app=FastAPI()
+
+mcp_app = mcp.http_app(path="/")
+app=FastAPI(lifespan=mcp_app.lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/mcp", mcp_app)
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
@@ -90,130 +52,21 @@ async def booking(request: Request):
 @app.get("/thankyou", include_in_schema=False)
 async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
+@app.get("/member", include_in_schema=False)
+async def member(request: Request):
+	return FileResponse("./static/member.html", media_type="text/html")
 
 @app.get("/api/attractions", response_class=JSONResponse, tags=["Attraction"])
 async def get_attractions_list(request: Request,page:int ,category:Annotated[str | None, Query()] = None,keyword:Annotated[str | None, Query()] = None,):
 	# 取得不同分頁的旅遊景點列表資料，也可以根據標題關鍵字、或捷運站名稱篩選
+	result = await get_att_list(page,category,keyword)
 
-	connect = cnxpool.get_connection()
-	try:
-		with connect.cursor() as cursor:
-			# 主要景點查詢
-			select = "SELECT a.id,a.name,c.name AS category,a.description,a.address,a.transport,m.name AS mrt,longitude,latitude FROM attractions a " \
-				"JOIN categories c ON a.category_id = c.id LEFT JOIN mrts m ON a.mrt_id = m.id " 
-			# 條件添加
-			cond = []
-			params = []
-			if category :	
-				cat = "c.name = %s"
-				cond.append(cat)
-				params.append(category)
-			if keyword :
-				mrt = "( a.name LIKE %s OR m.name = %s)"
-				cond.append(mrt)
-				params.extend([f"%{keyword}%", keyword])
-			if cond:	
-
-				select += " WHERE " + " AND ".join(cond)
-			# 範圍查詢 
-			PAGE_SIZE = 8
-			limit = PAGE_SIZE+1
-			offset = page * PAGE_SIZE
-			select += " ORDER BY a.id LIMIT %s OFFSET %s"
-			params.extend([limit, offset])
-			cursor.execute(select,params)
-			print(select)
-			print(params)
-			ans = cursor.fetchall()
-
-			# 如果無資料提前跳開api
-			if not ans:
-				return JSONResponse(
-					{
-						"nextPage": None,
-						"data": []
-					},
-					status_code=status.HTTP_200_OK
-				)
-
-			# nextpage 推算 用>8下去查，如果9代表後續有資料
-			if len(ans) > 8:
-				nextpage = page+1
-			else:
-				nextpage = None
-			
-			# 查詢獲得資料的圖片
-			attraction_ids = [row[0] for row in ans[:8]]
-			if attraction_ids:
-				print( attraction_ids)
-				holder = ','.join(["%s"] * len(attraction_ids)) 
-				img_query = f"SELECT attraction_id,img_url FROM att_img_urls WHERE attraction_id IN ({holder}) "
-				print("img_query : "+ img_query)
-				cursor.execute(img_query,attraction_ids)
-				img_rows = cursor.fetchall()
-			else:
-				img_rows =[]
-			images = {}
-			for attraction_id, img_url in img_rows:
-
-				if attraction_id not in images:
-					images[attraction_id] = []
-
-				images[attraction_id].append(img_url)
-			# 組裝
-			datas = []
-			for i in ans[:8]:
-				a = {
-					"id" : i[0],
-					"name" : i[1],
-					"category":i[2],
-					"description":i[3],
-					"address":i[4],
-					"transport":i[5],
-					"mrt":i[6],
-					"lat":float(i[8]),
-					"lng":float(i[7]),
-					"images" : images.get(i[0], [])
-				}
-				datas.append(a)
-			print(len(datas))
-	except Exception as e:
-		print(f"db error: {e}")
-		return JSONResponse({"error":True,"message":"查詢錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-	finally:
-		connect.close()
-
-	return JSONResponse({"nextpage":nextpage,"data":datas},status_code=status.HTTP_200_OK) 
+	return JSONResponse(result,status_code=status.HTTP_200_OK) 
 
 @app.get("/api/attractions/{attractionId}", response_class=JSONResponse, tags=["Attraction"])
-async def get_attractions(request: Request,attractionId:int):
-	connect = cnxpool.get_connection()
-	try:
-		with connect.cursor() as cursor:
-			select = "SELECT a.id,a.name,c.name AS category,a.description,a.address,a.transport,m.name AS mrt,longitude,latitude FROM attractions a " \
-					"JOIN categories c ON a.category_id = c.id LEFT JOIN mrts m ON a.mrt_id = m.id WHERE a.id = %s " 
-			cursor.execute(select,(attractionId,))
-			ans = cursor.fetchone()
-			cursor.execute("SELECT img_url FROM att_img_urls WHERE attraction_id = %s",(attractionId,))
-			images =  cursor.fetchall()
-			return_json = {
-					"id" : ans[0],
-					"name" : ans[1],
-					"category":ans[2],
-					"description":ans[3],
-					"address":ans[4],
-					"transport":ans[5],
-					"mrt":ans[6],
-					"lat":float(ans[8]),
-					"lng":float(ans[7]),
-					"images" : [url for (url,) in images]
-			}
-	except Exception as e:
-			print(f"db error: {e}")
-			return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-	finally:
-		connect.close()	
-	return JSONResponse({"data": return_json},status_code=status.HTTP_200_OK)
+async def get_attraction(request: Request,attractionId:int):
+	result = await search_attraction(attractionId)
+	return JSONResponse({"data": result},status_code=status.HTTP_200_OK)
 
 @app.get("/api/categories", response_class=JSONResponse, tags=["Attraction Category"])
 async def get_categories(request: Request):
@@ -381,48 +234,11 @@ async def get_booking(user:dict = Depends(get_current_user)):
 
 @app.post("/api/booking",response_class=JSONResponse,tags=["Booking"])
 async def new_booking(data:Booking_data,user=Depends(get_current_user)):
-	print(user)
-	if data.date < date.today():
-		return JSONResponse(
-			{"error": True, "message": "無效的時間"},
-			status_code=status.HTTP_400_BAD_REQUEST,
-		)
-	connect = cnxpool.get_connection()
-	try:
-		with connect.cursor() as cur:
-			cur.execute(
-				"SELECT id FROM attractions WHERE id = %s",
-				(data.attractionId,)
-			)
-
-			if cur.fetchone() is None:
-				return JSONResponse(
-					{"error": True, "message": "錯誤的景點ID"},
-					status_code=400
-				)
-			
-			dele_sql ="""
-				DELETE FROM orders
-				WHERE orders.user_id = %s AND orders.paid = FALSE 
-			"""
-			cur.execute(dele_sql,(user["id"],))
-			sql ="""
-                INSERT INTO orders (user_id, attraction_id, order_at, time_slot, price)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-			cur.execute(
-				sql,
-				(user["id"], data.attractionId, data.date, data.time.value, data.price)
-			)
-		connect.commit()
-		return JSONResponse({"ok":True},status_code=status.HTTP_201_CREATED)
-	except Exception as e:
-		connect.rollback()
-		print(f"db error: {e}")
-		return JSONResponse({"error":True,"message":"查詢時發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-	finally:
-		connect.close()
-		
+	print("now_user",user)
+	result = await add_booking(data,user["id"])
+	if not result:
+		return JSONResponse({"error":True,"message":"建立發生錯誤"},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return JSONResponse({"ok":True},status_code=status.HTTP_201_CREATED)
 
 
 @app.delete("/api/booking",response_class=JSONResponse,tags=["Booking"])
@@ -631,3 +447,39 @@ def get_order(order_number:str,user=Depends(get_current_user)):
 			},status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)		
 	finally:
 		connect.close()
+
+@app.get("/api/mcptoken",response_class=JSONResponse,)
+async def get_mcptoken(user=Depends(get_current_user)):
+	user_id = user["id"]
+	result = ser_mcptoken(user_id)
+	json_result = result.model_dump()
+	return JSONResponse(json_result,status_code=status.HTTP_200_OK)
+
+@app.patch("/api/mcptoken",response_class=JSONResponse,)
+async def get_mcptoken(user=Depends(get_current_user)):
+	user_id = user["id"]
+	result = new_mcptoken(user_id)
+	json_result = result.model_dump()
+	return JSONResponse(json_result,status_code=status.HTTP_202_ACCEPTED)
+
+
+# exception_handler
+@app.exception_handler(AttractionNotFoundError)
+async def att_no_found(request, exc):
+	return JSONResponse(
+            {
+                "error": True,
+                "message": "找不到景點"
+            },
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+@app.exception_handler(DatabaseError)
+async def sql_err(request, exc):
+	 return JSONResponse(
+            {
+                "error": True,
+                "message": "查詢發生錯誤"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
