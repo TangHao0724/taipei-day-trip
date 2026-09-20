@@ -53,7 +53,7 @@ async def add_to_cart(date:date,start_at:datetime,att_id:int,):
 		period = "afternoon"
 		price= "2500"
 	else:
-		raise {"error": True,"msg":"不在可預約時間點，請選擇早上(08-15)，或者下午(16-21)時段，謝謝！"}
+		return {"error": True,"msg":"不在可預約時間點，請選擇早上(08-15)，或者下午(16-21)時段，謝謝！"}
 	data = Booking_data(
 		attractionId=att_id,
 		date=date,
@@ -61,10 +61,11 @@ async def add_to_cart(date:date,start_at:datetime,att_id:int,):
 		price=price
 	)
 	result = await add_booking(data,id)
+	print("mcp order result:",result)
 	if not result:
-		raise {"error": True,"msg":"預約時發生錯誤。"}
+		return {"error": True,"msg":"預約時發生錯誤。"}
 	return{
-		"ok":True,
-		"message":"台北導覽行程，預定成功，請到 Booking Page URL 完成付款。",
-
-	}
+			"ok":True,
+			"message":"台北導覽行程，預定成功，請到 Booking Page URL 完成付款。",
+	
+		}
