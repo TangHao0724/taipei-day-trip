@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "public_mcp": {
+      "type": "http",
+      "url": "http://32.236.160.64:8000/mcp/"
+    },
+
+    "private_mcp": {
+      "type": "http",
+      "url": "http://32.236.160.64:8000/mcp/",
+      "bearer_token_env_var": "TDT_MCP_TOKEN"
+    }
+  }
+}
